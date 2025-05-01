@@ -29,18 +29,20 @@ class WaterConsumption(models.Model):
 
 
 class Customers(models.Model):
-    customer = models.CharField(max_length=100)
+    surname = models.CharField(max_length=100, null=True)
+    name = models.CharField(max_length=100, null=True)
+    fathersName = models.CharField(max_length=100, null=True)
 
     def __str__(self):
-        return self.customer
+        return f"{self.surname} {self.name} {self.fathersName}".strip()  # Αφαιρεί επιπλέον κενά
 
 
 class Counters(models.Model):
     collecter = models.CharField(max_length=20, null=True)
     counter = models.CharField(max_length=20, null=True)
-
+    
     def __str__(self):
-        return self.counter
+        return f"{self.collecter} {self.counter}".strip()
 
 
 class Paids(models.Model):
@@ -56,6 +58,10 @@ class Fields(models.Model):
     customer = models.ForeignKey(Customers, on_delete=models.CASCADE)
     field = models.CharField(max_length=20, null=True)
     olivesNumber = models.IntegerField(null=True, blank=True)
+
+    def __str__(self):
+        return f"{self.customer} {self.field}".strip()  # Αφαιρεί επιπλέον κενά
+
 
 
 class WaterCons(models.Model):
@@ -74,3 +80,7 @@ class WaterCons(models.Model):
     customer = models.ForeignKey(Customers, on_delete=models.CASCADE)
     counter = models.ForeignKey(Counters, on_delete=models.CASCADE)
     field = models.ForeignKey(Fields, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.viberMsg
+
