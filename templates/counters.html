@@ -1,0 +1,42 @@
+{% extends "main.html" %} 
+
+{% block title %}
+<title>Συνεταιρισμός Πεύκου - Μετρητές</title>
+
+{% endblock title %} 
+
+
+{% block content %}
+
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-8">
+            <h2 class="text-center text-white bg-dark p-3">Μετρητές</h2>
+            <table class="table">
+                <thead>
+                  <tr>
+                    {% comment %} <th scope="col"><a href="?sort=id&order={{ order }}">Id</a></th> {% endcomment %}
+                    <th scope="col"><a href="?sort=customer&order={{ order }}">Καταναλωτής</a></th>
+                    <th scope="col"><a href="?sort=collecter&order={{ order }}">Κολεκτέρ</a></th>
+                    <th scope="col"><a href="?sort=counter&order={{ order }}">Μετρητής</a></th>
+                    <th scope="col">Edit</th>
+                  </tr>
+                </thead>
+                <tbody>
+                    {% for d in data %}
+                  <tr>
+                    {% comment %} <th scope="row">{{d.id}}</th> {% endcomment %}
+                    <td>{{d.customer}}</td>
+                    <td>{{d.collecter}}</td>
+                    <td>{{d.counter}}</td>
+                    <td><a type="button" href="/counters/update/{{d.id}}" class="btn btn-warning">Edit</a></td>
+                    {% comment %} <td><a type="button"  href="/delete/{{d.id}}"  class="btn btn-danger">Delete</a></td> {% endcomment %}
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+        </div>
+    </div>
+</div>
+
+{% endblock content %}

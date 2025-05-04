@@ -1,0 +1,45 @@
+{% extends "main.html" %} 
+
+{% block title %}
+<title>Συνεταιρισμός Πεύκου - Πληρωμές</title>
+
+{% endblock title %} 
+
+
+{% block content %}
+
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-8">
+            <h4 class="text-center text-white bg-dark p-3">Πληρωμές</h4>
+            <table class="table">
+                <thead>
+                  <tr>
+                    <th scope="col"><a href="?sort=receiptNumber&order={{ order }}">ΑρΑπόδ</a></th>
+                    {% comment %} <th scope="col"><a href="?sort=customer&order={{ order }}">Καταναλωτής</a></th> {% endcomment %}
+                    <th scope="col"><a href="?sort=irrigation&order={{ order }}">Ποτισμός</a></th>
+                    <th scope="col"><a href="?sort=paid&order={{ order }}">Πληρωμή</a></th>
+                    <th scope="col"><a href="?sort=paymentDate&order={{ order }}">Ημ/νία</a></th>
+                    <th scope="col"><a href="?sort=balance&order={{ order }}">Ισοζύγιο</a></th>
+                    <th scope="col">Edit</th>
+                  </tr>
+                </thead>
+                <tbody>
+                    {% for d in data %}
+                  <tr>
+                    <td>{{d.receiptNumber}}</td>
+                    {% comment %} <td>{{d.customer}}</td> {% endcomment %}
+                    <td>{{d.irrigation}}</td>
+                    <td>{{d.paid}}</td>
+                    <td>{{d.paymentDate}}</td>
+                    <td>{{d.balance}}</td>
+                    <td><a type="button" href="/paids/update/{{d.id}}" class="btn btn-warning">Edit</a></td>
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+        </div>
+    </div>
+</div>
+
+{% endblock content %}

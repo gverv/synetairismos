@@ -1,0 +1,95 @@
+{% extends "main.html" %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2>Προσθήκη Ποτίσματος</h2>
+    <form method="post">
+        {% csrf_token %}
+        {{ form|crispy }}
+        <button type="submit" class="btn btn-success">Αποθήκευση</button>
+    </form>
+</div>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        let counterSelect = document.getElementById("id_counter");
+        let initialIndication = document.getElementById("id_initialIndication");
+    
+        counterSelect.addEventListener("change", function() {
+            let counterId = counterSelect.value;
+            if (counterId) {
+                fetch(`/get-final-indication/${counterId}/`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.finalIndication !== null) {
+                            initialIndication.value = data.finalIndication;
+                        } else {
+                            initialIndication.value = "";
+                        }
+                    })
+                    .catch(error => console.error("Σφάλμα:", error));
+            }
+        });
+    });
+</script>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        let finalIndication = document.getElementById("id_finalIndication");
+        let initialIndication = document.getElementById("id_initialIndication");
+        let cubicMeters = document.getElementById("id_cubicMeters");
+        let billableCubicMeters = document.getElementById("id_billableCubicMeters");
+        let hydronomistsCubicMeters = document.getElementById("id_hydronomistsCubicMeters");
+        let cost = document.getElementById("id_cost");
+        let hydronomistsRight = document.getElementById("id_hydronomistsRight");
+        let costPerMeter = document.getElementById("id_costPerMeter");
+    
+        function updateValues() {
+            let finalValue = parseFloat(finalIndication.value) || 0;
+            let initialValue = parseFloat(initialIndication.value) || 0;
+            let difference = finalValue - initialValue;
+    
+            cubicMeters.value = difference;
+            billableCubicMeters.value = difference;
+            hydronomistsCubicMeters.value = difference;
+            cost.value = (difference * parseFloat(costPerMeter.value)).toFixed(2);
+            hydronomistsRight.value = (difference * 0.05).toFixed(2);
+        }
+    
+        finalIndication.addEventListener("input", updateValues);
+        initialIndication.addEventListener("input", updateValues);
+        costPerMeter.addEventListener("input", updateValues);
+        customer.addEventListener("input", updateValues);
+        date.addEventListener("input", updateValues);
+    });
+</script>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        let customer = document.getElementById("id_customer");
+        let date = document.getElementById("id_date");
+        let finalIndication = document.getElementById("id_finalIndication");
+        let initialIndication = document.getElementById("id_initialIndication");
+        let billableCubicMeters = document.getElementById("id_billableCubicMeters");
+        let cost = document.getElementById("id_cost");
+        let viberMsg = document.getElementById("id_viberMsg");
+    
+        function updateViberMsg() {
+            let customerValue = customer.options[customer.selectedIndex]?.text || "";
+            let dateValue = date.value || "";
+            let finalValue = finalIndication.value || "";
+            let initialValue = initialIndication.value || "";
+            let costValue = cost.value || "";
+            let billableCubicMetersValue = billableCubicMeters.value || "";
+    
+            let message = `${customerValue}, ${dateValue}, ${finalValue} - ${initialValue} = ${billableCubicMetersValue}, ${costValue}`;
+            viberMsg.value = message;
+        }
+    
+        customer.addEventListener("change", updateViberMsg);
+        date.addEventListener("input", updateViberMsg);
+        finalIndication.addEventListener("input", updateViberMsg);
+        initialIndication.addEventListener("input", updateViberMsg);
+        cost.addEventListener("input", updateViberMsg);
+    });
+</script>
+            
+{% endblock %}

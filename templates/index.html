@@ -1,0 +1,48 @@
+{% extends "main.html" %} 
+
+{% block title %}
+<title>Συνεταιρισμός Πεύκου</title>
+
+{% endblock title %} 
+
+
+{% block content %}
+
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-8">
+          <h4 class="text-center text-white bg-dark p-3 sticky-top">Ποτισμοί</h4>
+          <table class="table">
+              <thead>
+                 <tr>
+                    <th scope="col"><a href="?sort=id&order={{ order }}">Id</a></th>
+                    <th scope="col"><a href="?sort=customer&order={{ order }}">Καταναλωτής</a></th>
+                    <th scope="col"><a href="?sort=date&order={{ order }}">Ημερομηνία</a></th>
+                    <th scope="col"><a href="?sort=billableCubicMeters&order={{ order }}">Κυβικά</a></th>
+                    <th scope="col"><a href="?sort=cost&order={{ order }}">Αξία</a></th>
+                    <th scope="col">Edit</th>
+                  </tr>
+                </thead>
+                <tbody>
+                    {% for d in data %}
+                  <tr>
+                    <th scope="row">{{d.id}}</th>
+                    <td>{{d.customer}}</td>
+                    <td>{{ d.date|date:"l, d-m-Y" }}</td>
+                    <td>{{d.billableCubicMeters}}</td>
+                    <td>{{d.cost}}</td>
+                    <td><a type="button" href="/update-irrigation/{{d.id}}" class="btn btn-warning">Edit</a></td>
+                    {% comment %} <td><a type="button"  href="/delete/{{d.id}}"  class="btn btn-danger">Delete</a></td> {% endcomment %}
+                  </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+{% endblock content %}

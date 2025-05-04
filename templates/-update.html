@@ -1,0 +1,55 @@
+{% extends "main.html" %} 
+
+{% block title %}
+<title>CRUD mini Project Update</title>
+
+{% endblock title %} 
+
+
+{% block content %}
+<h1>CRUD Operation</h1>
+
+<div class="container mt-5">
+
+    <div class="row">
+
+        <div class="col-md-4">
+            <h2 class="text-white bg-dark text-center p-3">Update Student Details</h2>
+            <br>
+
+            <form action="/update/{{d.id}}" method="post" class="aligned-form">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="name">Name</label>
+                    <input value={{d.name}} type="text" class="form-control" placeholder="Enter the Student Name" required name="name">
+                </div>
+                <br>
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input value={{d.email}} type="text" class="form-control mt-2" placeholder="Enter the Student Email" required name="email">
+                </div>
+                <br>
+                <div class="form-group">
+                    <label for="age">Age</label>
+                    <input value={{d.age}} type="number" class="form-control mt-2" placeholder="Enter the Student Age" required name="age">
+                </div>
+                <br>
+                <div class="form-group col-md-4">
+                    <label for="gender">Gender</label>
+                    <select id="inputState" class="form-control" name="gender" required>
+                        <option selected>{{d.gender}}</option>
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                        <option value="Others">Others</option>
+                    </select>
+                </div>
+                <br>
+                <div class="d-grid gap-2">
+                    <button class="btn btn-success" type="submit">Submit</button>
+                </div>
+            </form>
+
+        </div>
+    </div>
+</div>
+{% endblock content %}

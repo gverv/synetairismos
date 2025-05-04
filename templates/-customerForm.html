@@ -1,0 +1,113 @@
+
+
+<form action="/insert" method="post" class="aligned-form">
+    {% csrf_token %}
+    <div class="form-group">
+        <label for="surname">Επώνυμο</label>
+        <input type="text" class="form-control" placeholder="Επώνυμο" required name="surname">
+    </div>
+    <br>
+    <div class="form-group">
+        <label for="name">Όνομα</label>
+        <input type="text" class="form-control" placeholder="Όνομα" required name="name">
+    </div>
+    <br>
+    <div class="form-group">
+        <label for="fathersName">Πατρώνυμο</label>
+        <input type="text" class="form-control" placeholder="Πατρώνυμο" required name="fathersName">
+    </div>
+    <br>
+    <div class="form-group">
+        <label for="afm">ΑΦΜ</label>
+        <input type="text" class="form-control" placeholder="ΑΦΜ" required name="afm">
+    </div>
+    <br>
+    <div class="form-group">
+        <label for="surname">Επώνυμο</label>
+        <input type="text" class="form-control" placeholder="Επώνυμο" required name="surname">
+    </div>
+    <br>
+    <div class="d-grid gap-2">
+        <button class="btn btn-success" type="submit">Submit</button>
+    </div>
+</form>
+
+
+
+
+{% comment %} 
+<form action="" method="post" class="aligned-form">
+    <div class="form-group">
+        <label for="name">Name</label>
+        <input type="text" class="form-control" placeholder="Enter the Student Name" required name="name">
+    </div>
+    <div class="form-group">
+        <label for="email">Email</label>
+        <input type="text" class="form-control mt-2" placeholder="Enter the Student Email" required name="email">
+    </div>
+    <div class="form-group">
+        <label for="age">Age</label>
+        <input type="number" class="form-control mt-2" placeholder="Enter the Student Age" required name="age">
+    </div>
+
+    <div class="form-group col-md-4">
+        <label for="gender">Gender</label>
+        <select id="inputState" class="form-control" name="gender" required>
+            <option selected>Select Gender</option>
+            <option value="Male">Male</option>
+            <option value="Female">Female</option>
+            <option value="Others">Others</option>
+        </select>
+    </div>
+    <div class="d-grid gap-2">
+        <button class="btn btn-success" type="submit">Submit</button>
+    </div>
+</form>
+
+<style>
+.aligned-form {
+    display: grid;
+    grid-template-columns: auto 1fr; /* Δύο στήλες: auto για label, 1fr για input */
+    gap: 10px; /* Δημιουργία κενού μεταξύ γραμμών και στηλών */
+}
+
+.aligned-form .form-group {
+    display: contents; /* Τα children του form-group θα είναι άμεσα children του grid */
+}
+
+.aligned-form label {
+    text-align: right; /* Στοίχιση των labels δεξιά */
+    padding-right: 10px; /* Προσθήκη λίγου χώρου δεξιά από τα labels */
+    grid-column: 1; /* Τοποθέτηση στην πρώτη στήλη */
+    align-self: center; /* Ευθυγράμμιση κατακόρυφα στο κέντρο */
+}
+
+.aligned-form .form-control,
+.aligned-form .form-select { /* Συμπεριλαμβάνουμε και το select */
+    grid-column: 2; /* Τοποθέτηση στη δεύτερη στήλη */
+}
+
+/* Προσαρμογή για το select element */
+.aligned-form .col-md-4 {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 10px;
+    align-items: center;
+}
+
+.aligned-form .col-md-4 label {
+    /* Οι ιδιότητες έχουν ήδη οριστεί για όλα τα labels */
+}
+
+.aligned-form .col-md-4 select {
+    grid-column: 2;
+}
+
+/* Προσαρμογή για το κουμπί */
+.aligned-form .d-grid {
+    grid-column: 2 / span 1; /* Τοποθέτηση στη δεύτερη στήλη */
+    justify-self: start; /* Στοίχιση του κουμπιού στην αρχή της δεύτερης στήλης */
+    margin-top: 15px; /* Προσθήκη λίγου χώρου πάνω από το κουμπί */
+}
+</style>
+ {% endcomment %}
