@@ -15,6 +15,7 @@
             <table class="table">
                 <thead>
                   <tr>
+                    <th scope="col">ΑΑ</th>
                     <th scope="col"><a href="?sort=id&order={{ order }}">Id</a></th> 
                     <th scope="col"><a href="?sort=surname&order={{ order }}">Καταναλωτής</a></th>
                     <th scope="col">Edit</th>
@@ -23,6 +24,7 @@
                 <tbody>
                     {% for d in data %}
                   <tr>
+                    <th scope="row">{{ forloop.counter }}</th>
                     <th scope="row">{{d.id}}</th>
                     <td><a href="/customerIrrigations/{{d.id}}">{{d.surname}} {{d.name}} {{d.fathersName}}</a></td>
                     <td><a type="button" href="/customers/update/{{d.id}}" class="btn btn-warning">Edit</a></td>
