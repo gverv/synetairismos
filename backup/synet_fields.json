@@ -1,0 +1,500 @@
+[
+    {
+        "customer_id": 1,
+        "field": "",
+        "id": 1,
+        "olivesNumber": null
+    },
+    {
+        "customer_id": 2,
+        "field": "",
+        "id": 2,
+        "olivesNumber": null
+    },
+    {
+        "customer_id": 3,
+        "field": "",
+        "id": 3,
+        "olivesNumber": null
+    },
+    {
+        "customer_id": 4,
+        "field": "",
+        "id": 4,
+        "olivesNumber": null
+    },
+    {
+        "customer_id": 5,
+        "field": "",
+        "id": 5,
+        "olivesNumber": null
+    },
+    {
+        "customer_id": 6,
+        "field": "",
+        "id": 6,
+        "olivesNumber": null
+    },
+    {
+        "customer_id": 7,
+        "field": "",
+        "id": 7,
+        "olivesNumber": null
+    },
+    {
+        "customer_id": 8,
+        "field": "",
+        "id": 8,
+        "olivesNumber": null
+    },
+    {
+        "customer_id": 9,
+        "field": "",
+        "id": 9,
+        "olivesNumber": null
+    },
+    {
+        "customer_id": 10,
+        "field": "",
+        "id": 10,
+        "olivesNumber": null
+    },
+    {
+        "customer_id": 11,
+        "field": "",
+        "id": 11,
+        "olivesNumber": null
+    },
+    {
+        "customer_id": 12,
+        "field": "",
+        "id": 12,
+        "olivesNumber": null
+    },
+    {
+        "customer_id": 13,
+        "field": "",
+        "id": 13,
+        "olivesNumber": null
+    },
+    {
+        "customer_id": 14,
+        "field": "",
+        "id": 14,
+        "olivesNumber": null
+    },
+    {
+        "customer_id": 15,
+        "field": "",
+        "id": 15,
+        "olivesNumber": null
+    },
+    {
+        "customer_id": 16,
+        "field": "",
+        "id": 16,
+        "olivesNumber": null
+    },
+    {
+        "customer_id": 17,
+        "field": "",
+        "id": 17,
+        "olivesNumber": null
+    },
+    {
+        "customer_id": 6,
+        "field": "Αργουλίδα",
+        "id": 18,
+        "olivesNumber": null
+    },
+    {
+        "customer_id": 1,
+        "field": "Σπίθοι",
+        "id": 19,
+        "olivesNumber": 300
+    },
+    {
+        "customer_id": 8,
+        "field": "Γριάς Πλάγια",
+        "id": 20,
+        "olivesNumber": 300
+    },
+    {
+        "customer_id": 18,
+        "field": "Πετσοκόλι",
+        "id": 21,
+        "olivesNumber": 130
+    },
+    {
+        "customer_id": 2,
+        "field": "Ηρώ",
+        "id": 22,
+        "olivesNumber": 350
+    },
+    {
+        "customer_id": 19,
+        "field": "Σοφοκλή",
+        "id": 23,
+        "olivesNumber": 150
+    },
+    {
+        "customer_id": 20,
+        "field": "Λούτρα",
+        "id": 24,
+        "olivesNumber": 100
+    },
+    {
+        "customer_id": 21,
+        "field": "",
+        "id": 25,
+        "olivesNumber": null
+    },
+    {
+        "customer_id": 22,
+        "field": "",
+        "id": 26,
+        "olivesNumber": null
+    },
+    {
+        "customer_id": 4,
+        "field": "Κεφάλα",
+        "id": 27,
+        "olivesNumber": 160
+    },
+    {
+        "customer_id": 15,
+        "field": "Σμαϊλη",
+        "id": 28,
+        "olivesNumber": null
+    },
+    {
+        "customer_id": 23,
+        "field": "Κεφάλα-Κόρνια",
+        "id": 29,
+        "olivesNumber": 500
+    },
+    {
+        "customer_id": 20,
+        "field": "Καμπιά",
+        "id": 30,
+        "olivesNumber": 400
+    },
+    {
+        "customer_id": 23,
+        "field": "",
+        "id": 31,
+        "olivesNumber": 100
+    },
+    {
+        "customer_id": 16,
+        "field": "Κομάτα",
+        "id": 32,
+        "olivesNumber": 160
+    },
+    {
+        "customer_id": 8,
+        "field": "Κουφωτός",
+        "id": 33,
+        "olivesNumber": 200
+    },
+    {
+        "customer_id": 15,
+        "field": "Χαμετιανά",
+        "id": 34,
+        "olivesNumber": null
+    },
+    {
+        "customer_id": 20,
+        "field": "Συνοικισμός",
+        "id": 35,
+        "olivesNumber": null
+    },
+    {
+        "customer_id": 21,
+        "field": "Συνοικισμός",
+        "id": 36,
+        "olivesNumber": null
+    },
+    {
+        "customer_id": 3,
+        "field": "",
+        "id": 37,
+        "olivesNumber": 390
+    },
+    {
+        "customer_id": 6,
+        "field": "Χατζ. Αργουλίδα",
+        "id": 38,
+        "olivesNumber": 100
+    },
+    {
+        "customer_id": 7,
+        "field": "Κεφάλα",
+        "id": 39,
+        "olivesNumber": 300
+    },
+    {
+        "customer_id": 6,
+        "field": "Αντωνία",
+        "id": 40,
+        "olivesNumber": null
+    },
+    {
+        "customer_id": 24,
+        "field": "Συνοικισμός",
+        "id": 41,
+        "olivesNumber": 80
+    },
+    {
+        "customer_id": 10,
+        "field": "Αργουλίδα",
+        "id": 42,
+        "olivesNumber": null
+    },
+    {
+        "customer_id": 14,
+        "field": "Πετσοκόλι",
+        "id": 43,
+        "olivesNumber": null
+    },
+    {
+        "customer_id": 10,
+        "field": "Κατσικαντάρι",
+        "id": 44,
+        "olivesNumber": null
+    },
+    {
+        "customer_id": 1,
+        "field": "Τσιγαράς",
+        "id": 45,
+        "olivesNumber": null
+    },
+    {
+        "customer_id": 23,
+        "field": "",
+        "id": 46,
+        "olivesNumber": null
+    },
+    {
+        "customer_id": 25,
+        "field": "",
+        "id": 47,
+        "olivesNumber": null
+    },
+    {
+        "customer_id": 14,
+        "field": "Περδικόσελο",
+        "id": 48,
+        "olivesNumber": null
+    },
+    {
+        "customer_id": 14,
+        "field": "Περδικόσελο-Γεώτρηση",
+        "id": 49,
+        "olivesNumber": null
+    },
+    {
+        "customer_id": 10,
+        "field": "Αμυγδαλές",
+        "id": 50,
+        "olivesNumber": null
+    },
+    {
+        "customer_id": 10,
+        "field": "Λούτρα",
+        "id": 51,
+        "olivesNumber": null
+    },
+    {
+        "customer_id": 26,
+        "field": "Χαμετιανά",
+        "id": 52,
+        "olivesNumber": null
+    },
+    {
+        "customer_id": 27,
+        "field": "",
+        "id": 53,
+        "olivesNumber": null
+    },
+    {
+        "customer_id": 28,
+        "field": "",
+        "id": 54,
+        "olivesNumber": null
+    },
+    {
+        "customer_id": 20,
+        "field": "",
+        "id": 55,
+        "olivesNumber": null
+    },
+    {
+        "customer_id": 29,
+        "field": "",
+        "id": 56,
+        "olivesNumber": null
+    },
+    {
+        "customer_id": 30,
+        "field": "",
+        "id": 57,
+        "olivesNumber": null
+    },
+    {
+        "customer_id": 26,
+        "field": "",
+        "id": 58,
+        "olivesNumber": null
+    },
+    {
+        "customer_id": 19,
+        "field": "",
+        "id": 59,
+        "olivesNumber": null
+    },
+    {
+        "customer_id": 31,
+        "field": "",
+        "id": 60,
+        "olivesNumber": null
+    },
+    {
+        "customer_id": 32,
+        "field": "",
+        "id": 61,
+        "olivesNumber": null
+    },
+    {
+        "customer_id": 24,
+        "field": "",
+        "id": 62,
+        "olivesNumber": null
+    },
+    {
+        "customer_id": 33,
+        "field": "",
+        "id": 63,
+        "olivesNumber": null
+    },
+    {
+        "customer_id": 34,
+        "field": "",
+        "id": 64,
+        "olivesNumber": null
+    },
+    {
+        "customer_id": 35,
+        "field": "",
+        "id": 65,
+        "olivesNumber": null
+    },
+    {
+        "customer_id": 36,
+        "field": "",
+        "id": 66,
+        "olivesNumber": null
+    },
+    {
+        "customer_id": 37,
+        "field": "",
+        "id": 67,
+        "olivesNumber": null
+    },
+    {
+        "customer_id": 38,
+        "field": "",
+        "id": 68,
+        "olivesNumber": null
+    },
+    {
+        "customer_id": 39,
+        "field": "",
+        "id": 69,
+        "olivesNumber": null
+    },
+    {
+        "customer_id": 40,
+        "field": "",
+        "id": 70,
+        "olivesNumber": null
+    },
+    {
+        "customer_id": 41,
+        "field": "",
+        "id": 71,
+        "olivesNumber": null
+    },
+    {
+        "customer_id": 42,
+        "field": "",
+        "id": 72,
+        "olivesNumber": null
+    },
+    {
+        "customer_id": 43,
+        "field": "",
+        "id": 73,
+        "olivesNumber": null
+    },
+    {
+        "customer_id": 44,
+        "field": "",
+        "id": 74,
+        "olivesNumber": null
+    },
+    {
+        "customer_id": 45,
+        "field": "",
+        "id": 75,
+        "olivesNumber": null
+    },
+    {
+        "customer_id": 46,
+        "field": "",
+        "id": 76,
+        "olivesNumber": null
+    },
+    {
+        "customer_id": 47,
+        "field": "",
+        "id": 77,
+        "olivesNumber": null
+    },
+    {
+        "customer_id": 48,
+        "field": "",
+        "id": 78,
+        "olivesNumber": null
+    },
+    {
+        "customer_id": 49,
+        "field": "",
+        "id": 79,
+        "olivesNumber": null
+    },
+    {
+        "customer_id": 50,
+        "field": "",
+        "id": 80,
+        "olivesNumber": null
+    },
+    {
+        "customer_id": 51,
+        "field": "",
+        "id": 81,
+        "olivesNumber": null
+    },
+    {
+        "customer_id": 52,
+        "field": "",
+        "id": 82,
+        "olivesNumber": null
+    },
+    {
+        "customer_id": 53,
+        "field": "",
+        "id": 83,
+        "olivesNumber": null
+    }
+]
