@@ -15,7 +15,8 @@ urlpatterns = [
     path('add-irrigation/', WaterConsCreateView.as_view(), name='add_irrigation'),
     path('update-irrigation/<int:pk>/', WaterConsUpdateView.as_view(), name='update_irrigation'),    # path('insert', views.insertData, name="insertData"),
     path('get-final-indication/<int:counter_id>/', get_last_final_indication, name='get_final_indication'),    # path('update/<int:id>', views.updateData, name="updateData"),
+    path('customerIrrigations/<int:customer_id>/', views.customerIrrigations, name="customerIrrigations"),
     # path('delete/<int:id>', views.deleteData, name="deleteData"),
-    # path('update-customer/<str:pk>/', views.updateCustomer, name="update-customer"),
     # path('add-student', views.addStudent, name="addStudent"),
 ]
+

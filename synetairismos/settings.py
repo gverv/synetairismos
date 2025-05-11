@@ -34,6 +34,7 @@ INSTALLED_APPS = [
     'synet.apps.SynetConfig',
     'crispy_forms',
     'crispy_bootstrap4',  # Προσθήκη του crispy-bootstrap4
+    'django.contrib.humanize',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',

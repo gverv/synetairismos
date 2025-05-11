@@ -33,8 +33,9 @@ class Customers(models.Model):
     name = models.CharField(max_length=100, null=True, blank=True)
     fathersName = models.CharField(max_length=100, null=True, blank=True)
     afm = models.CharField(max_length=9, null=True, blank=True)
-    member = models.BooleanField(default=True)
-    payAsMember = models.BooleanField(default=True)
+    member = models.BooleanField(default=True) # Είναι μέλος του συνεταιρισμού
+    payAsMember = models.BooleanField(default=True) # Πληρώνει σαν μέλος του συνεταιρισμού
+    isActive = models.BooleanField(default=False) # Είναι ενεργός στον πολτισμό
 
     class Meta:
         ordering = ['surname', 'name']
@@ -81,6 +82,7 @@ class WaterCons(models.Model):
     cubicMeters = models.IntegerField(null=True, blank=True)
     billableCubicMeters = models.IntegerField(null=True, blank=True)
     hydronomistsCubicMeters = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    costPerMeter = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True, default=0.30)
     cost = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     hydronomistsRight = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     viberMsg = models.CharField(max_length=200, null=True, blank=True)

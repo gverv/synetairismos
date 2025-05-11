@@ -1,10 +1,12 @@
 {% extends "main.html" %}
+{% load crispy_forms_tags %}
+
 {% block content %}
 <div class="container mt-5">
     <h2>Ενημέρωση Ποτίσματος</h2>
     <form method="post">
         {% csrf_token %}
-        {{ form.as_p }}
+        {{ form|crispy }}
         <button type="submit" class="btn btn-warning">Ενημέρωση</button>
     </form>
 </div>

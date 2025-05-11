@@ -24,7 +24,7 @@
                     {% for d in data %}
                   <tr>
                     <th scope="row">{{d.id}}</th>
-                    <td>{{d.surname}} {{d.name}} {{d.fathersName}}</td>
+                    <td><a href="/customerIrrigations/{{d.id}}">{{d.surname}} {{d.name}} {{d.fathersName}}</a></td>
                     <td><a type="button" href="/customers/update/{{d.id}}" class="btn btn-warning">Edit</a></td>
                     {% comment %} <td><a type="button"  href="/delete/{{d.id}}"  class="btn btn-danger">Delete</a></td> {% endcomment %}
                   </tr>

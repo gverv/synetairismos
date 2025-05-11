@@ -1,4 +1,5 @@
 {% extends "main.html" %} 
+{% load humanize %}
 
 {% block title %}
 <title>Συνεταιρισμός Πεύκου</title>
@@ -12,13 +13,21 @@
     <div class="row">
         <div class="col-md-8">
           <h4 class="text-center text-white bg-dark p-3 sticky-top">Ποτισμοί</h4>
+          <h5>
+            Συνολικά κυβικά: {{total_cubic|intcomma}} 
+            Χρεώσιμα: {{total_billable|intcomma}} 
+            Συνολική Αξία: <span class="format-number">{{ total_cost|floatformat:2 }}</span>
+            Υδρονομέας: <span class="format-number">{{ total_hydronomists|floatformat:2 }}</span>
+          </h5>
+
           <table class="table">
               <thead>
                  <tr>
                     <th scope="col"><a href="?sort=id&order={{ order }}">Id</a></th>
                     <th scope="col"><a href="?sort=customer&order={{ order }}">Καταναλωτής</a></th>
                     <th scope="col"><a href="?sort=date&order={{ order }}">Ημερομηνία</a></th>
-                    <th scope="col"><a href="?sort=billableCubicMeters&order={{ order }}">Κυβικά</a></th>
+                    <th scope="col"><a href="?sort=cubicMeters&order={{ order }}">Πραγματικά</a></th>
+                    <th scope="col"><a href="?sort=billableCubicMeters&order={{ order }}">Χρεώσιμα</a></th>
                     <th scope="col"><a href="?sort=cost&order={{ order }}">Αξία</a></th>
                     <th scope="col">Edit</th>
                   </tr>
@@ -29,6 +38,7 @@
                     <th scope="row">{{d.id}}</th>
                     <td>{{d.customer}}</td>
                     <td>{{ d.date|date:"l, d-m-Y" }}</td>
+                    <td>{{d.cubicMeters}}</td>
                     <td>{{d.billableCubicMeters}}</td>
                     <td>{{d.cost}}</td>
                     <td><a type="button" href="/update-irrigation/{{d.id}}" class="btn btn-warning">Edit</a></td>
@@ -44,5 +54,27 @@
 
 
 
+{% comment %} <script>
+  document.addEventListener("DOMContentLoaded", function() {
+      let numberElements = document.querySelectorAll(".format-number");
+  
+      numberElements.forEach(element => {
+          let formattedValue = element.innerText.replace(/(\d+),(\d\d)/g, '$1.$2');
+          element.innerText = formattedValue;
+      });
+  });
+  </script> {% endcomment %}
 
+  <script>
+    document.addEventListener("DOMContentLoaded", function() {
+        let numberElements = document.querySelectorAll(".format-number");
+    
+        numberElements.forEach(element => {
+            let formattedValue = element.innerText.replace(/\B(?=(\d{3})+(?!\d))/g, ".").replace(/(\d+)\.(\d\d)$/, '$1,$2');
+            element.innerText = formattedValue;
+        });
+    });
+    </script>
+
+    
 {% endblock content %}
