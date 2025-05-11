@@ -1,6 +1,6 @@
 from synet.models import Customers 
 
-for customer in Customers.objects.all():
+for customer in Persons.customers():
     parts = customer.customer.split()  # Διαχωρισμός με βάση τα κενά
     if len(parts) > 0:
         customer.surname = parts[0]  # Το πρώτο κομμάτι στο surname

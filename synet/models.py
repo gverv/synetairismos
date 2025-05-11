@@ -28,26 +28,39 @@ class WaterConsumption(models.Model):
         return self.viberMsg
 
 
-class Customers(models.Model):
+class Persons(models.Model):
     surname = models.CharField(max_length=100)
     name = models.CharField(max_length=100, null=True, blank=True)
     fathersName = models.CharField(max_length=100, null=True, blank=True)
-    afm = models.CharField(max_length=9, null=True, blank=True)
-    member = models.BooleanField(default=True) # Είναι μέλος του συνεταιρισμού
-    payAsMember = models.BooleanField(default=True) # Πληρώνει σαν μέλος του συνεταιρισμού
-    isActive = models.BooleanField(default=False) # Είναι ενεργός στον πολτισμό
+    afm = models.CharField(max_length=9, null=True, blank=True, unique=True)
+    mobilePhone = models.CharField(max_length=10, null=True, blank=True)
+    member = models.BooleanField(default=True)  # Είναι μέλος του συνεταιρισμού
+    payAsMember = models.BooleanField(default=True)  # Πληρώνει σαν μέλος του συνεταιρισμού
+    isActive = models.BooleanField(default=False)  # Είναι ενεργός στον πολιτισμό
+    aa = models.IntegerField(null=True, blank=True, unique=True)  # Αύξων αριθμός απόφασης ΔΣ 7/10/2000
+    placeΟfΡesidence = models.CharField(max_length=20, null=True, blank=True) # Τόπος διαμονής
+    notes = models.CharField(max_length=100, null=True, blank=True)
 
     class Meta:
-        ordering = ['surname', 'name']
+        unique_together = ('surname', 'name', 'fathersName')
+        ordering = ['surname', 'name', 'fathersName']
     
     def __str__(self):
         return f"{self.surname} {self.name} {self.fathersName}".strip()  # Αφαιρεί επιπλέον κενά
+
+    @classmethod
+    def customers(cls):
+        return cls.objects.filter(isActive=True)
+
+    @classmethod
+    def members(cls):
+        return cls.objects.filter(member=True)    
 
 
 class Counters(models.Model):
     collecter = models.CharField(max_length=20)
     counter = models.CharField(max_length=20, null=True, blank=True)
-    customer = models.ForeignKey(Customers, null=True, blank=True, on_delete=models.CASCADE)
+    customer = models.ForeignKey(Persons, null=True, blank=True, on_delete=models.CASCADE)
 
     class Meta:
         ordering = ['collecter']
@@ -63,7 +76,7 @@ class Receivers(models.Model):
     
 
 class Fields(models.Model):
-    customer = models.ForeignKey(Customers, on_delete=models.CASCADE)
+    customer = models.ForeignKey(Persons, on_delete=models.CASCADE)
     field = models.CharField(max_length=20, null=True, blank=True)
     olivesNumber = models.IntegerField(null=True, blank=True)
 
@@ -75,7 +88,7 @@ class WaterCons(models.Model):
     serialNumber = models.IntegerField(null=True, blank=True)
     date = models.DateField()
     counter = models.ForeignKey(Counters, on_delete=models.CASCADE)
-    customer = models.ForeignKey(Customers, on_delete=models.CASCADE)
+    customer = models.ForeignKey(Persons, on_delete=models.CASCADE)
     finalIndication = models.IntegerField()
     initialIndication = models.IntegerField()
     intermediateIndication = models.IntegerField(null=True, blank=True)

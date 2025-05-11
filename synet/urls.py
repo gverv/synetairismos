@@ -1,13 +1,13 @@
 from django.urls import path
 from . import views
-from .views import get_last_final_indication, CustomersUpdateView, CountersUpdateView, PaidsUpdateView, WaterConsCreateView, WaterConsUpdateView
+from .views import get_last_final_indication, PersonsUpdateView, CountersUpdateView, PaidsUpdateView, WaterConsCreateView, WaterConsUpdateView
 
 urlpatterns = [
     path('index', views.index, name="index"),
     path('', views.index, name="root"),
     path('about', views.about, name="about"),
     path('customers/', views.customers, name="customers"),
-    path('customers/update/<int:pk>/', CustomersUpdateView.as_view(), name='customers_update'),
+    path('customers/update/<int:pk>/', PersonsUpdateView.as_view(), name='customers_update'),
     path('counters/', views.counters, name="counters"),
     path('counters/update/<int:pk>/', CountersUpdateView.as_view(), name='counters_update'),
     path('paids/', views.paids, name="paids"),

@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect
 from django.contrib import messages
-from .models import Counters, Customers, WaterCons, Fields, Paids
-from .forms import WaterConsForm, UserForm, CustomersForm, CountersForm, PaidsForm
+from .models import Counters, Persons, WaterCons, Fields, Paids
+from .forms import WaterConsForm, UserForm, PersonsForm, CountersForm, PaidsForm
 from django.views.generic import UpdateView, CreateView
 from django.urls import reverse_lazy
 from django.http import JsonResponse
@@ -39,7 +39,8 @@ def customerIrrigations(request, customer_id):
     if order == 'desc':
         sort_by = f'-{sort_by}'  # Προσθέτει "-" για φθίνουσα ταξινόμηση
     data = WaterCons.objects.all().filter(customer_id=customer_id).order_by(sort_by)    
-    customer = Customers.objects.filter(id=customer_id).first()
+    # customer = Customers.objects.filter(id=customer_id).first()
+    customer = Persons.customers().filter(id=customer_id).first()
     total_cost = WaterCons.objects.filter(customer_id=customer_id).aggregate(Sum('cost'))['cost__sum']
     total_cubic = WaterCons.objects.filter(customer_id=customer_id).aggregate(Sum('cubicMeters'))['cubicMeters__sum']
     total_billable = WaterCons.objects.filter(customer_id=customer_id).aggregate(Sum('billableCubicMeters'))['billableCubicMeters__sum']
@@ -61,16 +62,16 @@ def customers(request):
     order = request.GET.get('order', 'asc')
     if order == 'desc':
         sort_by = f'-{sort_by}'  # Προσθέτει "-" για φθίνουσα ταξινόμηση
-    data = Customers.objects.all().order_by(sort_by)    
+    data = Persons.customers().order_by(sort_by)    
     context = {'data': data, 'order': 'asc' if order == 'desc' else 'desc'}
     return render(request, 'customers.html', context)
 
 
-class CustomersUpdateView(UpdateView):
-    model = Customers
-    form_class = CustomersForm
-    template_name = 'customers_update.html'  # Το όνομα του template
-    success_url = reverse_lazy('customers')  # Ανακατεύθυνση μετά την ενημέρωση
+class PersonsUpdateView(UpdateView):
+    model = Persons
+    form_class = PersonsForm
+    template_name = 'persons_update.html'
+    success_url = reverse_lazy('customers')
 
 def counters(request):
     sort_by = request.GET.get('sort', 'collecter')

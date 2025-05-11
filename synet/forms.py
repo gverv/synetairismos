@@ -1,7 +1,7 @@
 import datetime
 from datetime import date
 from django import forms
-from synet.models import  Customers, Counters, Paids, Fields, WaterCons, Receivers
+from synet.models import  Persons, Counters, Paids, Fields, WaterCons, Receivers
 from django.contrib.auth.models import User
 from django.forms import ModelForm, TextInput, NumberInput, Select
 
@@ -81,9 +81,9 @@ class UserForm(ModelForm):
 #             'name': TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter the Customer Name'}),
 #         }        
 
-class CustomersForm(forms.ModelForm):
+class PersonsForm(forms.ModelForm):
     class Meta:
-        model = Customers
+        model = Persons
         fields = ['surname', 'name', 'fathersName', 'afm', 'member', 'payAsMember']
         labels = {
             'surname': 'Επώνυμο',
