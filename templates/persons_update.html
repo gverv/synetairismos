@@ -11,46 +11,46 @@
     {% include "navbar.html" %}
     <div class="container mt-5">
         <h2>Ενημέρωση Καταναλωτή</h2>
-{% comment %} 
         <form method="post">
             {% csrf_token %}
             {{ form|crispy }}
             <button type="submit" class="btn btn-primary">Αποθήκευση</button>
-        </form>
- {% endcomment %}
- <form method="post">
-    {% csrf_token %}
-    <div class="mb-4">  <!-- Προσθήκη κενής γραμμής -->
-        {{ form.surname.label_tag }}<br>
-        {{ form.surname }}
-    </div>
-
-    <div class="mb-4">
-        {{ form.name.label_tag }}<br>
-        {{ form.name }}
-    </div>
-
-    <div class="mb-4">
-        {{ form.fathersName.label_tag }}<br>
-        {{ form.fathersName }}
-    </div>
-
-    <div class="mb-4">
-        {{ form.afm.label_tag }}<br>
-        {{ form.afm }}
-    </div>
-
-    <div class="mb-4">
-        {{ form.member.label_tag }}<br>
-        {{ form.member }}
-    </div>
-
-    <div class="mb-4">
-        {{ form.payAsMember.label_tag }}<br>
-        {{ form.payAsMember }}
-    </div>
-
-    <button type="submit" class="btn btn-primary">Αποθήκευση</button>
+            </form>
+            {% comment %} 
+            <form method="post">
+                {% csrf_token %}
+                <div class="mb-4">  <!-- Προσθήκη κενής γραμμής -->
+                {{ form.surname.label_tag }}<br>
+                {{ form.surname }}
+            </div>
+            
+            <div class="mb-4">
+                {{ form.name.label_tag }}<br>
+                {{ form.name }}
+            </div>
+            
+            <div class="mb-4">
+                {{ form.fathersName.label_tag }}<br>
+                {{ form.fathersName }}
+            </div>
+            
+            <div class="mb-4">
+                {{ form.afm.label_tag }}<br>
+                {{ form.afm }}
+            </div>
+            
+            <div class="mb-4">
+                {{ form.member.label_tag }}<br>
+                {{ form.member }}
+            </div>
+            
+            <div class="mb-4">
+                {{ form.payAsMember.label_tag }}<br>
+                {{ form.payAsMember }}
+            </div>
+            
+            <button type="submit" class="btn btn-primary">Αποθήκευση</button>
+            {% endcomment %}
 </form>
 
     </div>

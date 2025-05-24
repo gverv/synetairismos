@@ -6,9 +6,9 @@ from django.contrib.auth.models import User
 from django.forms import ModelForm, TextInput, NumberInput, Select
 
 class WaterConsForm(ModelForm):
-    costPerMeter = forms.DecimalField(
-        max_digits=5, decimal_places=2, initial=0.30, label="Κόστος ανά κυβικό"
-    )
+    # costPerMeter = forms.DecimalField(
+    #     max_digits=5, decimal_places=2, initial=0.30, label="Κόστος ανά κυβικό"
+    # )
     class Meta:
         model = WaterCons
         fields = [
@@ -44,9 +44,7 @@ class WaterConsForm(ModelForm):
         
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # self.fields['date'].initial = forms.DateField().widget.attrs['value'] = forms.DateField().widget.format_value(forms.DateField().to_python('today'))
         self.fields['date'].initial = forms.DateField().widget.attrs['value'] = date.today().strftime("%Y-%m-%d")
-        # self.fields['counter'].initial = Counters.objects.get(id=1)  # Προτείνει τον μετρητή με id=1
                 
     # def save(self, *args, **kwargs):
     #     if self.initialIndication is not None and self.finalIndication is not None:
@@ -84,14 +82,20 @@ class UserForm(ModelForm):
 class PersonsForm(forms.ModelForm):
     class Meta:
         model = Persons
-        fields = ['surname', 'name', 'fathersName', 'afm', 'member', 'payAsMember']
+        fields = '__all__'
+        # fields = ['surname', 'name', 'fathersName', 'afm', 'member', 'payAsMember']
         labels = {
             'surname': 'Επώνυμο',
             'name': 'Όνομα',
             'fathersName': 'Πατρώνυμο',
             'afm': 'ΑΦΜ',
+            'phone': 'Τηλέφωνο',
             'member': 'Μέλος',
             'payAsMember': 'Πληρωμή ως μέλος',
+            'isActive': 'Ενεργός',
+            'aa': 'Α/Α μέλους',
+            'placeOfResidence': 'Κατοικία',
+            'Notes': 'Σημειώσεις',
         }
         
 class CountersForm(forms.ModelForm):
@@ -111,8 +115,9 @@ class PaidsForm(forms.ModelForm):
         model = Paids
         fields = '__all__'
         labels = {
-            # 'customer': 'Καταναλωτης',
             'irrigation': 'Ποτισμός',
+            'customer': 'Καταναλωτης',
+            'cost': 'Αξία',
             'paid': 'Πλήρωσε',
             'paymentDate': 'Ημ/νίαΠληρωμής',
             'receiver': 'Εισπράκτορας',

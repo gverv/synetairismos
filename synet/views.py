@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from .models import Counters, Persons, WaterCons, Fields, Paids
 from .forms import WaterConsForm, UserForm, PersonsForm, CountersForm, PaidsForm
@@ -14,7 +14,7 @@ def get_last_final_indication(request, counter_id):
     return JsonResponse({'finalIndication': None})
 
 def index(request):
-    sort_by = request.GET.get('sort', 'id')
+    sort_by = request.GET.get('sort', '-id')
     order = request.GET.get('order', 'asc')
     if order == 'desc':
         sort_by = f'-{sort_by}'  # Προσθέτει "-" για φθίνουσα ταξινόμηση
@@ -120,3 +120,49 @@ def addPayFromIrrigation(request, irrigation_id):
     irrigation = WaterCons.objects.filter(id=irrigation_id).first()
     context = { 'irrigation': irrigation }
     return render(request, 'addPayFromIrrigation.html', context)
+
+
+def create_payment(request, irrigation_id):
+    irrigation = get_object_or_404(WaterCons, id=irrigation_id)
+
+    # Βρίσκουμε το τελευταίο receiptNumber και υπολογίζουμε το επόμενο
+    last_receipt = Paids.objects.order_by('-receiptNumber').first()
+    next_receipt_number = (last_receipt.receiptNumber + 1) if last_receipt else 1
+
+    if request.method == 'POST':
+        form = PaidsForm(request.POST)
+        if form.is_valid():
+            # Δημιουργούμε νέο `Paids`
+            payment = form.save(commit=False)
+            payment.irrigation = irrigation
+            payment.customer = irrigation.customer
+            payment.cost = irrigation.cost
+            payment.paid = form.cleaned_data['paid'] or 0
+            payment.paymentDate = form.cleaned_data['paymentDate']
+            payment.receiver = form.cleaned_data['receiver']
+            payment.receiptNumber = next_receipt_number
+            payment.balance = -irrigation.cost
+            
+            payment.save()
+
+            # Ενημερώνουμε το `receipt` στο `WaterCons`
+            irrigation.receipt = payment
+            irrigation.save()
+
+            return redirect('paids')
+
+    else:
+        # Προσυμπληρωμένες τιμές στη φόρμα
+        form = PaidsForm(initial={
+            'irrigation': irrigation.id,
+            'customer': irrigation.customer,
+            'cost': irrigation.cost,
+            'paid': 0,
+            'paymentDate': None,
+            'receiver': None,
+            'receiptNumber': next_receipt_number,
+            'balance': -irrigation.cost,
+        })
+        context = {'form': form, 'irrigation': irrigation}
+
+    return render(request, 'create_payment.html', context)

@@ -33,12 +33,12 @@ class Persons(models.Model):
     name = models.CharField(max_length=100, null=True, blank=True)
     fathersName = models.CharField(max_length=100, null=True, blank=True)
     afm = models.CharField(max_length=9, null=True, blank=True, unique=True)
-    mobilePhone = models.CharField(max_length=10, null=True, blank=True)
+    phone = models.CharField(max_length=10, null=True, blank=True)
     member = models.BooleanField(default=True)  # Είναι μέλος του συνεταιρισμού
     payAsMember = models.BooleanField(default=True)  # Πληρώνει σαν μέλος του συνεταιρισμού
     isActive = models.BooleanField(default=False)  # Είναι ενεργός στον πολιτισμό
     aa = models.IntegerField(null=True, blank=True, unique=True)  # Αύξων αριθμός απόφασης ΔΣ 7/10/2000
-    placeΟfΡesidence = models.CharField(max_length=20, null=True, blank=True) # Τόπος διαμονής
+    placeOfResidence = models.CharField(max_length=20, null=True, blank=True) # Τόπος διαμονής
     notes = models.CharField(max_length=100, null=True, blank=True)
 
     class Meta:
@@ -60,7 +60,7 @@ class Persons(models.Model):
 class Counters(models.Model):
     collecter = models.CharField(max_length=20)
     counter = models.CharField(max_length=20, null=True, blank=True)
-    customer = models.ForeignKey(Persons, null=True, blank=True, on_delete=models.CASCADE)
+    customer = models.ForeignKey(Persons, null=True, blank=True, on_delete=models.SET_NULL)
 
     class Meta:
         ordering = ['collecter']
@@ -76,7 +76,7 @@ class Receivers(models.Model):
     
 
 class Fields(models.Model):
-    customer = models.ForeignKey(Persons, on_delete=models.CASCADE)
+    customer = models.ForeignKey(Persons, on_delete=models.SET_NULL, null=True)
     field = models.CharField(max_length=20, null=True, blank=True)
     olivesNumber = models.IntegerField(null=True, blank=True)
 
@@ -87,8 +87,8 @@ class Fields(models.Model):
 class WaterCons(models.Model):
     serialNumber = models.IntegerField(null=True, blank=True)
     date = models.DateField()
-    counter = models.ForeignKey(Counters, on_delete=models.CASCADE)
-    customer = models.ForeignKey(Persons, on_delete=models.CASCADE)
+    counter = models.ForeignKey(Counters, on_delete=models.SET_NULL, null=True)
+    customer = models.ForeignKey(Persons, on_delete=models.SET_NULL, null=True)
     finalIndication = models.IntegerField()
     initialIndication = models.IntegerField()
     intermediateIndication = models.IntegerField(null=True, blank=True)
@@ -100,7 +100,9 @@ class WaterCons(models.Model):
     hydronomistsRight = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     viberMsg = models.CharField(max_length=200, null=True, blank=True)
     notes = models.TextField( null=True,blank=True)
-    field = models.ForeignKey(Fields, on_delete=models.CASCADE, null=True, blank=True)
+    field = models.ForeignKey(Fields, on_delete=models.SET_NULL, null=True, blank=True)
+    receipt = models.ForeignKey("Paids", on_delete=models.SET_NULL, null=True, blank=True, related_name="watercons_receipts") # idΑπόδειξης (paids_id)
+    # aReceiptWasIssued = models.BooleanField(default=False)  # Εκδόθηκε απόδειξη
     
     def save(self, *args, **kwargs):
         if not self.serialNumber:  # Αν δεν έχει ήδη οριστεί το serialNumber
@@ -116,12 +118,13 @@ class WaterCons(models.Model):
 
 
 class Paids(models.Model):
-    # customer = models.ForeignKey(Customers, on_delete=models.CASCADE)
-    irrigation = models.ForeignKey(WaterCons, on_delete=models.CASCADE, null=True, blank=True)
+    irrigation = models.ForeignKey(WaterCons, on_delete=models.SET_NULL, null=True, blank=True, related_name="paid_irrigations")
+    customer = models.ForeignKey(Persons, on_delete=models.SET_NULL, null=True)
+    cost = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    receiptNumber = models.IntegerField(null=True, blank=True, unique=True)
     paid = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     paymentDate = models.DateField(null=True, blank=True)
-    receiver = models.ForeignKey(Receivers, on_delete=models.CASCADE, null=True, blank=True)
-    receiptNumber = models.IntegerField(null=True, blank=True)
+    receiver = models.ForeignKey(Receivers, on_delete=models.SET_NULL, null=True, blank=True)
     balance = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
 
     def __str__(self):
