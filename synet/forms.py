@@ -11,6 +11,7 @@ class WaterConsForm(ModelForm):
     # )
     class Meta:
         model = WaterCons
+        # fields = '__all__'
         fields = [
             'date', 
             'counter', 
@@ -23,7 +24,8 @@ class WaterConsForm(ModelForm):
             'costPerMeter',
             'cost', 
             'hydronomistsRight', 
-            'viberMsg'
+            'viberMsg',
+            'receipt'
             ]
         labels = {
          'date': 'Ημ/νία',
@@ -40,6 +42,7 @@ class WaterConsForm(ModelForm):
          'viberMsg': "Μήνυμα",
          'notes': "Σημειώσεις",
          'field': "Χωράφι",
+         'receipt': "Απόδειξη"
         }
         
     def __init__(self, *args, **kwargs):

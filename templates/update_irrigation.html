@@ -1,6 +1,5 @@
 {% extends "main.html" %}
 {% load crispy_forms_tags %}
-
 {% block content %}
 <div class="container mt-5">
     <h2>Ενημέρωση Ποτίσματος</h2>
@@ -8,6 +7,15 @@
         {% csrf_token %}
         {{ form|crispy }}
         <button type="submit" class="btn btn-warning">Ενημέρωση</button>
+{% comment %}         
+        <p> object.receipt: {{ object.receipt }} </p> 
+        <p> object.id: {{ object.id }} </p> 
+ {% endcomment %}
+        {% if object.receipt %}
+            <a href="{% url 'paids_update' object.receipt.id %}" class="btn btn-primary mt-3">Απόδειξη</a>
+        {% else %}
+            <a href="{% url 'create_payment' object.id %}" class="btn btn-success mt-3">Δημιουργία Απόδειξης</a>
+        {% endif %}
     </form>
 </div>
 {% endblock %}

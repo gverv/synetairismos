@@ -104,6 +104,17 @@ class PaidsUpdateView(UpdateView):
     template_name = 'paids_update.html'  # Το όνομα του template
     success_url = reverse_lazy('paids')  # Ανακατεύθυνση μετά την ενημέρωση
 
+def paids_update(request, id):
+    paid = get_object_or_404(Paids, id=id)
+    if request.method == "POST":
+        form = PaidsForm(request.POST, instance=paid)
+        if form.is_valid():
+            form.save()
+            return redirect('paids')
+    else:
+        form = PaidsForm(instance=paid)
+    return render(request, 'paids_update.html', {'form': form})
+
 class WaterConsCreateView(CreateView):
     model = WaterCons
     form_class = WaterConsForm
@@ -141,7 +152,7 @@ def create_payment(request, irrigation_id):
             payment.paymentDate = form.cleaned_data['paymentDate']
             payment.receiver = form.cleaned_data['receiver']
             payment.receiptNumber = next_receipt_number
-            payment.balance = -irrigation.cost
+            # payment.balance = -irrigation.cost
             
             payment.save()
 
@@ -161,8 +172,14 @@ def create_payment(request, irrigation_id):
             'paymentDate': None,
             'receiver': None,
             'receiptNumber': next_receipt_number,
-            'balance': -irrigation.cost,
+            # 'balance': -irrigation.cost,
         })
         context = {'form': form, 'irrigation': irrigation}
 
     return render(request, 'create_payment.html', context)
+
+
+def update_irrigation(request, irrigation_id):
+    waterCons = get_object_or_404(WaterCons, id=irrigation_id)
+    form = WaterConsForm(instance=waterCons)
+    return render(request, 'update_irrigation.html', {'form': form, 'waterCons': waterCons})
