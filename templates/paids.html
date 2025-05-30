@@ -33,7 +33,15 @@
                     <td>{{d.paid}}</td>
                     <td>{{d.paymentDate}}</td>
                     <td>{{d.balance}}</td>
-                    <td><a type="button" href="/paids/update/{{d.id}}" class="btn btn-warning">Edit</a></td>
+                    {% if d.balance == 0 %}
+                      <td><a type="button" href="/paids/update/{{d.id}}" class="btn btn-primary">Edit</a></td>
+                    {% elif d.balance > 0 %}
+                      <td><a type="button" href="/paids/update/{{d.id}}" class="btn btn-success">Edit</a></td>
+                    {% elif d.balance < 0 %}
+                      <td><a type="button" href="/paids/update/{{d.id}}" class="btn btn-danger">Edit</a></td>
+                    {% else %}
+                      <td><a type="button" href="/paids/update/{{d.id}}" class="btn btn-warning">Edit</a></td>
+                    {% endif %}
                   </tr>
                   {% endfor %}
                 </tbody>

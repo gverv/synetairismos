@@ -6,9 +6,6 @@ from django.contrib.auth.models import User
 from django.forms import ModelForm, TextInput, NumberInput, Select
 
 class WaterConsForm(ModelForm):
-    # costPerMeter = forms.DecimalField(
-    #     max_digits=5, decimal_places=2, initial=0.30, label="Κόστος ανά κυβικό"
-    # )
     class Meta:
         model = WaterCons
         # fields = '__all__'

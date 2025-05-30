@@ -8,6 +8,7 @@
         {% csrf_token %}
         {{ form|crispy }}
         <button type="submit" class="btn btn-success">Αποθήκευση</button>
+        <button type="button" class="btn btn-info" id="copyMsgClb">Αντιγραφή Μηνύματος</button>
     </form>
 </div>
 <script>
@@ -77,6 +78,23 @@
         date.addEventListener("input", updateViberMsg);
         cost.addEventListener("input", updateViberMsg);
     });
-    </script>
+
+    document.addEventListener("DOMContentLoaded", function() {
+        let copyButton = document.getElementById("copyMsgClb");
+        let viberMsg = document.getElementById("id_viberMsg");
+
+        copyButton.addEventListener("click", function() {
+            if (viberMsg.value) {
+                navigator.clipboard.writeText(viberMsg.value).then(() => {
+//                    alert("Το μήνυμα αντιγράφηκε στο πρόχειρο!");
+                }).catch(err => {
+                    console.error("Σφάλμα αντιγραφής:", err);
+                });
+            } else {
+                alert("Το πεδίο μηνύματος είναι κενό!");
+            }
+        });
+    });
+</script>
             
 {% endblock %}

@@ -90,7 +90,7 @@ class CountersUpdateView(UpdateView):
 
 
 def paids(request):
-    sort_by = request.GET.get('sort', 'receiptNumber')
+    sort_by = request.GET.get('sort', '-receiptNumber')
     order = request.GET.get('order', 'asc')
     if order == 'desc':
         sort_by = f'-{sort_by}'  # Προσθέτει "-" για φθίνουσα ταξινόμηση
@@ -110,7 +110,8 @@ def paids_update(request, id):
         form = PaidsForm(request.POST, instance=paid)
         if form.is_valid():
             form.save()
-            return redirect('paids')
+            # return redirect('paids')
+            return redirect('index')
     else:
         form = PaidsForm(instance=paid)
     return render(request, 'paids_update.html', {'form': form})
@@ -160,7 +161,8 @@ def create_payment(request, irrigation_id):
             irrigation.receipt = payment
             irrigation.save()
 
-            return redirect('paids')
+            return redirect('index')
+            # return redirect('paids')
 
     else:
         # Προσυμπληρωμένες τιμές στη φόρμα

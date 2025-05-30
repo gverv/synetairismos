@@ -12,9 +12,9 @@
         <p> object.id: {{ object.id }} </p> 
  {% endcomment %}
         {% if object.receipt %}
-            <a href="{% url 'paids_update' object.receipt.id %}" class="btn btn-primary mt-3">Απόδειξη</a>
+            <a href="{% url 'paids_update' object.receipt.id %}" class="btn btn-primary">Απόδειξη</a>
         {% else %}
-            <a href="{% url 'create_payment' object.id %}" class="btn btn-success mt-3">Δημιουργία Απόδειξης</a>
+            <a href="{% url 'create_payment' object.id %}" class="btn btn-success">Δημιουργία Απόδειξης</a>
         {% endif %}
     </form>
 </div>
