@@ -3,10 +3,24 @@
 {% block title %}
 <title>Συνεταιρισμός Πεύκου Σύνολα</title>
 <style>
+@media print {
+    /* Απόκρυψη των menus ή άλλων στοιχείων */
+    .menu, .sidebar, .navbar { 
+        display: none; 
+    }
+
+    /* Προσαρμογή του πίνακα */
+    .table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+}
 </style>
 {% endblock title %} 
 
 {% block content %}
+<br><br>
+<button onclick="window.print()">Εκτύπωση</button>
 
 <table class="table">
     <thead>
