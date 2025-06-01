@@ -22,7 +22,7 @@ class WaterConsForm(ModelForm):
             'cost', 
             'hydronomistsRight', 
             'viberMsg',
-            'receipt'
+            # 'receipt'
             ]
         labels = {
          'date': 'Ημ/νία',

@@ -1,11 +1,12 @@
 from django.urls import path
 from . import views
-from .views import get_last_final_indication, PersonsUpdateView, CountersUpdateView, PaidsUpdateView, WaterConsCreateView, WaterConsUpdateView,  create_payment
+from .views import get_last_final_indication, PersonsUpdateView, CountersUpdateView, PaidsUpdateView, WaterConsCreateView, WaterConsUpdateView,  create_payment, report_view
 
 urlpatterns = [
     path('index', views.index, name="index"),
     path('', views.index, name="root"),
     path('about', views.about, name="about"),
+    path('report/', report_view, name='report'),
     path('customers/', views.customers, name="customers"),
     path('customers/update/<int:pk>/', PersonsUpdateView.as_view(), name='customers_update'),
     path('counters/', views.counters, name="counters"),

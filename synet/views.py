@@ -7,6 +7,24 @@ from django.urls import reverse_lazy
 from django.http import JsonResponse
 from django.db.models import Sum
 
+def report_view(request):
+    # Φιλτράρουμε τα άτομα που έχουν υπόλοιπο διαφορετικό από 0
+    persons = Persons.objects.filter(paids__balance__isnull=False).distinct()
+    
+    report_data = []
+    for person in persons:
+        payments = Paids.objects.filter(customer=person).exclude(balance=0)
+        total_balance = payments.aggregate(total=Sum('balance'))['total'] or 0
+        report_data.append({
+            'surname': person.surname,
+            'name': person.name,
+            'fathersName': person.fathersName,
+            'payments': payments,
+            'total_balance': total_balance
+        })
+
+    return render(request, 'report.html', {'report_data': report_data})
+
 def get_last_final_indication(request, counter_id):
     last_entry = WaterCons.objects.filter(counter_id=counter_id).order_by('-date').first()
     if last_entry:
@@ -23,34 +41,43 @@ def index(request):
     total_hydronomists = WaterCons.objects.all().aggregate(Sum('hydronomistsRight'))['hydronomistsRight__sum']
     total_cubic = WaterCons.objects.all().aggregate(Sum('cubicMeters'))['cubicMeters__sum']
     total_billable = WaterCons.objects.all().aggregate(Sum('billableCubicMeters'))['billableCubicMeters__sum']
+    total_paid = Paids.objects.all().aggregate(Sum('paid'))['paid__sum']
+    debt = total_cost - total_paid
     context = {
         'data': data, 
         'order': 'asc' if order == 'desc' else 'desc',
         'total_cost': total_cost,
         'total_cubic': total_cubic,
         'total_billable': total_billable,
-        'total_hydronomists': total_hydronomists
+        'total_hydronomists': total_hydronomists,
+        'total_paid': total_paid,
+        'debt': debt,
         }
     return render(request, 'index.html', context)
 
 def customerIrrigations(request, customer_id):
-    sort_by = request.GET.get('sort', 'id')
+    sort_by = request.GET.get('sort', '-id')
     order = request.GET.get('order', 'asc')
     if order == 'desc':
         sort_by = f'-{sort_by}'  # Προσθέτει "-" για φθίνουσα ταξινόμηση
     data = WaterCons.objects.all().filter(customer_id=customer_id).order_by(sort_by)    
-    # customer = Customers.objects.filter(id=customer_id).first()
+    customerPaids = Paids.objects.all().filter(customer=customer_id).order_by(sort_by)    
     customer = Persons.customers().filter(id=customer_id).first()
     total_cost = WaterCons.objects.filter(customer_id=customer_id).aggregate(Sum('cost'))['cost__sum']
     total_cubic = WaterCons.objects.filter(customer_id=customer_id).aggregate(Sum('cubicMeters'))['cubicMeters__sum']
     total_billable = WaterCons.objects.filter(customer_id=customer_id).aggregate(Sum('billableCubicMeters'))['billableCubicMeters__sum']
+    total_paid = Paids.objects.filter(customer=customer_id).aggregate(Sum('paid'))['paid__sum']
+    debt = total_cost - total_paid
     context = {
         'data': data, 
         'order': 'asc' if order == 'desc' else 'desc', 
         'customer': customer, 
         'total_cost': total_cost,
         'total_cubic': total_cubic,
-        'total_billable': total_billable
+        'total_billable': total_billable,
+        'customerPaids': customerPaids,
+        'total_paid': total_paid,
+        'debt': debt,
         }
     return render(request, 'customerIrrigations.html', context)
 
@@ -152,8 +179,8 @@ def create_payment(request, irrigation_id):
             payment.paid = form.cleaned_data['paid'] or 0
             payment.paymentDate = form.cleaned_data['paymentDate']
             payment.receiver = form.cleaned_data['receiver']
-            payment.receiptNumber = next_receipt_number
-            # payment.balance = -irrigation.cost
+            # payment.receiptNumber = next_receipt_number
+            payment.receiptNumber = form.cleaned_data['receiptNumber']
             
             payment.save()
 
@@ -174,7 +201,7 @@ def create_payment(request, irrigation_id):
             'paymentDate': None,
             'receiver': None,
             'receiptNumber': next_receipt_number,
-            # 'balance': -irrigation.cost,
+            'balance': -irrigation.cost,
         })
         context = {'form': form, 'irrigation': irrigation}
 

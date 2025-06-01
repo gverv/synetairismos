@@ -3,7 +3,16 @@
 
 {% block title %}
 <title>Συνεταιρισμός Πεύκου {{customer}}</title>
-
+<style>
+  td a.btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 30px; /* Μικρότερο ύψος */
+    padding: 5px 10px; /* Ρύθμιση εσωτερικού κενού */
+    font-size: 14px; /* Αν θες να μειώσεις και το μέγεθος της γραμματοσειράς */
+  }
+</style>
 {% endblock title %} 
 
 
@@ -17,29 +26,68 @@
             Συνολική Αξία: {{ total_cost|floatformat:2|intcomma }}
             Συνολικά κυβικά: {{total_cubic|intcomma}} 
             Χρεώσιμα: {{total_billable|intcomma}} 
+            Πλήρωσε: {{ total_paid|floatformat:2|intcomma }}
+            Οφείλει: {{ debt|floatformat:2|intcomma }}
           </h5>
           <table class="table">
               <thead>
                  <tr>
                     <th scope="col"><a href="?sort=id&order={{ order }}">Id</a></th>
-                    {% comment %} <th scope="col"><a href="?sort=customer&order={{ order }}">Καταναλωτής</a></th> {% endcomment %}
-                    <th scope="col"><a href="?sort=date&order={{ order }}">Ημερομηνία</a></th>
-                    <th scope="col"><a href="?sort=billableCubicMeters&order={{ order }}">Κυβικά</a></th>
-                    <th scope="col"><a href="?sort=cost&order={{ order }}">Αξία</a></th>
+                    <th scope="col">Ημερομηνία</th>
+                    <th scope="col">Κυβικά</th>
+                    <th scope="col">Αξία</th>
                     <th scope="col">Edit</th>
+                    <th scope="col">Απόδειξη</th>
                   </tr>
                 </thead>
                 <tbody>
                     {% for d in data %}
                   <tr>
-                    <th scope="row">{{d.id}}</th>
-                    {% comment %} <td>{{d.customer}}</td> {% endcomment %}
-                    <td>{{ d.date|date:"l, d-m-Y" }}</td>
+                    <td scope="row">{{d.id}}</td>
+                    <td>{{ d.date|date:"D, d-m-y" }}</td>
                     <td>{{d.billableCubicMeters}}</td>
                     <td>{{d.cost}}</td>
                     <td><a type="button" href="/update-irrigation/{{d.id}}" class="btn btn-warning">Edit</a></td>
+                    {% if d.receipt %}
+                      <td><a href="{% url 'paids_update' d.receipt.id %}" class="btn btn-primary">Απόδειξη</a></td>
+                    {% else %}
+                      <td><a href="{% url 'create_payment' d.id %}" class="btn btn-success">Δημιουργία</a></td>
+                    {% endif %}
                     {% comment %} <td><a type="button"  href="/delete/{{d.id}}"  class="btn btn-danger">Delete</a></td> {% endcomment %}
                   </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            <h4 class="text-center text-white bg-dark p-3">Πληρωμές</h4>
+            <table class="table">
+                <thead>
+                  <tr>
+                    <th scope="col">ΑρΑπόδ</th>
+                    <th scope="col">Ποτισμός</th>
+                    <th scope="col">Πληρωμή</th>
+                    <th scope="col">Ημ/νία</th>
+                    <th scope="col">Ισοζύγιο</th>
+                    <th scope="col">Edit</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for d in customerPaids %}
+                    <tr>
+                      <td>{{d.receiptNumber}}</td>
+                      <td>{{d.irrigation}}</td>
+                      <td>{{d.paid}}</td>
+                      <td>{{d.paymentDate}}</td>
+                      <td>{{d.balance}}</td>
+                      {% if d.balance == 0 %}
+                        <td><a type="button" href="/paids/update/{{d.id}}" class="btn btn-primary">Edit</a></td>
+                      {% elif d.balance > 0 %}
+                        <td><a type="button" href="/paids/update/{{d.id}}" class="btn btn-success">Edit</a></td>
+                      {% elif d.balance < 0 %}
+                        <td><a type="button" href="/paids/update/{{d.id}}" class="btn btn-danger">Edit</a></td>
+                      {% else %}
+                        <td><a type="button" href="/paids/update/{{d.id}}" class="btn btn-warning">Edit</a></td>
+                      {% endif %}
+                    </tr>
                   {% endfor %}
                 </tbody>
               </table>
@@ -47,8 +95,14 @@
     </div>
 </div>
 
-
-
-
-
+  <script>
+    document.addEventListener("DOMContentLoaded", function() {
+        let numberElements = document.querySelectorAll(".format-number");
+    
+        numberElements.forEach(element => {
+            let formattedValue = element.innerText.replace(/\B(?=(\d{3})+(?!\d))/g, ".").replace(/(\d+)\.(\d\d)$/, '$1,$2');
+            element.innerText = formattedValue;
+        });
+    });
+    </script>
 {% endblock content %}

@@ -2,13 +2,15 @@
 {% load humanize %}
 
 {% block title %}
-<title>Συνεταιρισμός Πεύκου</title>
+<title>Συνεταιρισμός Πεύκου Ποτισμοί</title>
 <style>
   td a.btn {
     display: flex;
     align-items: center;
     justify-content: center;
-    height: 100%;
+    height: 30px; /* Μικρότερο ύψος */
+    padding: 5px 10px; /* Ρύθμιση εσωτερικού κενού */
+    font-size: 14px; /* Αν θες να μειώσεις και το μέγεθος της γραμματοσειράς */
   }
 </style>
 {% endblock title %} 
@@ -25,6 +27,8 @@
             Χρεώσιμα: {{total_billable|intcomma}} 
             Συνολική Αξία: <span class="format-number">{{ total_cost|floatformat:2 }}</span>
             Υδρονομέας: <span class="format-number">{{ total_hydronomists|floatformat:2 }}</span>
+            Εκκαθαρισμένες πληρωμές: <span class="format-number">{{ total_paid|floatformat:2 }}</span>
+            Εκκαθαρισμένη οφειλή: <span class="format-number">{{ debt|floatformat:2 }}</span>
           </h5>
 
           <table class="table">
@@ -65,19 +69,6 @@
     </div>
 </div>
 
-
-
-
-{% comment %} <script>
-  document.addEventListener("DOMContentLoaded", function() {
-      let numberElements = document.querySelectorAll(".format-number");
-  
-      numberElements.forEach(element => {
-          let formattedValue = element.innerText.replace(/(\d+),(\d\d)/g, '$1.$2');
-          element.innerText = formattedValue;
-      });
-  });
-  </script> {% endcomment %}
 
   <script>
     document.addEventListener("DOMContentLoaded", function() {
