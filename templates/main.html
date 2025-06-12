@@ -13,7 +13,20 @@
             color: white;
             z-index: 1020;
         }
-    </style>
+        @media print {
+            /* Απόκρυψη των menus ή άλλων στοιχείων */
+            button, .btn, a.btn, .menu, .sidebar, .navbar { 
+                display: none; 
+            }
+{% comment %} 
+            /* Προσαρμογή του πίνακα */
+            .table {
+                width: 100%;
+                border-collapse: collapse;
+            }
+ {% endcomment %}
+        }
+        </style>
     {% block title %}
 
     {% endblock title %}
