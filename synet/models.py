@@ -61,6 +61,7 @@ class Counters(models.Model):
     collecter = models.CharField(max_length=20)
     counter = models.CharField(max_length=20, null=True, blank=True)
     customer = models.ForeignKey(Persons, null=True, blank=True, on_delete=models.SET_NULL)
+    lastIndication = models.IntegerField(null=True, blank=True)
 
     class Meta:
         ordering = ['collecter']

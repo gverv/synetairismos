@@ -101,11 +101,13 @@ class PersonsForm(forms.ModelForm):
 class CountersForm(forms.ModelForm):
     class Meta:
         model = Counters
-        fields = ['customer', 'collecter', 'counter']
+        fields = '__all__'
+        # fields = ['customer', 'collecter', 'counter', 'lastIndication']
         labels = {
             'customer': 'Καταναλωτης',
             'collecter': 'Κολεκτέρ',
             'counter': 'Μετρητής',
+            'lastIndication': 'Τελευταία Ένδειξη',
         }        
  
 

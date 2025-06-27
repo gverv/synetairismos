@@ -22,5 +22,6 @@ urlpatterns = [
     ## diplo onoma # path('payment/add/<int:irrigation_id>/', create_payment, name='create_payment'),
     # path('delete/<int:id>', views.deleteData, name="deleteData"),
     # path('add-student', views.addStudent, name="addStudent"),
+    path('counter/<int:pk>/', views.counter_detail, name='counter_detail'),
 ]
 

@@ -212,3 +212,13 @@ def update_irrigation(request, irrigation_id):
     waterCons = get_object_or_404(WaterCons, id=irrigation_id)
     form = WaterConsForm(instance=waterCons)
     return render(request, 'update_irrigation.html', {'form': form, 'waterCons': waterCons})
+
+
+def counter_detail(request, pk):
+    counter = get_object_or_404(Counters, pk=pk)
+    consumptions = WaterCons.objects.filter(counter=counter).order_by('-date', '-finalIndication')
+    return render(request, 'counter_detail.html', {
+        'counter': counter,
+        'consumptions': consumptions
+    })
+    

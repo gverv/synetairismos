@@ -15,7 +15,7 @@
             <table class="table">
                 <thead>
                   <tr>
-                    {% comment %} <th scope="col"><a href="?sort=id&order={{ order }}">Id</a></th> {% endcomment %}
+                    <th scope="col"><a href="?sort=id&order={{ order }}">Id</a></th>
                     <th scope="col"><a href="?sort=customer&order={{ order }}">Καταναλωτής</a></th>
                     <th scope="col"><a href="?sort=collecter&order={{ order }}">Κολεκτέρ</a></th>
                     <th scope="col"><a href="?sort=counter&order={{ order }}">Μετρητής</a></th>
@@ -25,7 +25,7 @@
                 <tbody>
                     {% for d in data %}
                   <tr>
-                    {% comment %} <th scope="row">{{d.id}}</th> {% endcomment %}
+                    <td scope="row"><a href="/counter/{{d.id}}">{{d.id}}</a></td>
                     <td>{{d.customer}}</td>
                     <td>{{d.collecter}}</td>
                     <td>{{d.counter}}</td>
