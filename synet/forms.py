@@ -46,21 +46,6 @@ class WaterConsForm(ModelForm):
         super().__init__(*args, **kwargs)
         self.fields['date'].initial = forms.DateField().widget.attrs['value'] = date.today().strftime("%Y-%m-%d")
                 
-    # def save(self, *args, **kwargs):
-    #     if self.initialIndication is not None and self.finalIndication is not None:
-    #         difference = self.finalIndication - self.initialIndication
-    #         self.cubicMeters = difference
-    #         self.billableCubicMeters = difference
-    #         self.hydronomistsCubicMeters = difference
-
-    #     if self.billableCubicMeters is not None:
-    #         self.cost = self.billableCubicMeters * 0.30  # Χρήση του default costPerMeter
-    #         self.hydronomistsRight = self.hydronomistsCubicMeters * 0.05
-
-    #     self.viberMsg = f"{self.customer}, {self.date}, {self.finalIndication} - {self.initialIndication} = {self.cost}"
-
-    #     super().save(*args, **kwargs)
-        
 class UserForm(ModelForm):
     class Meta:
         model = User

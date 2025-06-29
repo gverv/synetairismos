@@ -1,12 +1,19 @@
 <nav class="navbar navbar-expand-lg navbar-light bg-body-tertiary fixed-top">
-    <div class="container-md text-center">
+  <div class="container-md d-flex justify-content-between align-items-center">
+    <div class="d-flex gap-2">
       <a class="navbar-brand" href="/">Ποτισμοί</a>
       <a class="navbar-brand" href="/customers/">Καταναλωτές</a>
       <a class="navbar-brand" href="/counters/">Μετρητές</a>
       <a class="navbar-brand" href="/paids/">Πληρωμές</a>
       <a class="navbar-brand" href="#"></a>
       <a class="navbar-brand" href="#"></a>
-      <a class="navbar-brand" href="#"></a>
-      <a class="navbar-brand" href="/add-irrigation/">ΠροσθήκηΠοτισμού</a>
+      <a class="navbar-brand" href="/report/">Αναφορά</a>
+      <a class="navbar-brand" href="/add-irrigation/">Προσθήκη Ποτισμού</a>
     </div>
-  </nav>
+    <form class="d-flex" method="get" action="{% url 'global_search' %}">
+      <input class="form-control me-2" type="search" name="q" placeholder="Αναζήτηση..." aria-label="Αναζήτηση">
+      <button class="btn btn-outline-primary" type="submit">🔍</button>
+    </form>
+  </div>
+</nav>
+

@@ -3,46 +3,14 @@
 
 {% block content %}
 <div class="container mt-5">
-  <h2>Προσθήκη Ποτίσματος</h2>
-  <form method="post">
-    {% csrf_token %}
-
-    <div class="mb-3">
-    {{ form.counter|as_crispy_field }}
-    </div>
-
-    <div class="row mb-3">
-      <div class="col-md-4">{{ form.date|as_crispy_field }}</div>  
-      <div class="col-md-4">{{ form.finalIndication|as_crispy_field }}</div>
-      <div class="col-md-4">{{ form.initialIndication|as_crispy_field }}</div>
-    </div>    
-      
-    <div class="mb-3">
-      {{ form.customer|as_crispy_field }}
-    </div>
-
-    <div class="row mb-3">
-      <div class="col-md-4">{{ form.cubicMeters|as_crispy_field }}</div>
-      <div class="col-md-4">{{ form.billableCubicMeters|as_crispy_field }}</div>
-      <div class="col-md-4">{{ form.hydronomistsCubicMeters|as_crispy_field }}</div>
-    </div>
-
-    <div class="row mb-3">
-      <div class="col-md-4">{{ form.costPerMeter|as_crispy_field }}</div>
-      <div class="col-md-4">{{ form.cost|as_crispy_field }}</div>
-      <div class="col-md-4">{{ form.hydronomistsRight|as_crispy_field }}</div>
-    </div>
-
-    <div class="mb-3">
-      {{ form.viberMsg|as_crispy_field }}
-    </div>
-
-    <button type="submit" class="btn btn-success">Αποθήκευση</button>
-    <button type="button" class="btn btn-info" id="copyMsgClb">Αντιγραφή Μηνύματος</button>
-  </form>
+    <h2>Προσθήκη Ποτίσματος</h2>
+    <form method="post">
+        {% csrf_token %}
+        {{ form|crispy }}
+        <button type="submit" class="btn btn-success">Αποθήκευση</button>
+        <button type="button" class="btn btn-info" id="copyMsgClb">Αντιγραφή Μηνύματος</button>
+    </form>
 </div>
-
-
 <script>
     document.addEventListener("DOMContentLoaded", function() {
         let counterSelect = document.getElementById("id_counter");
