@@ -23,5 +23,11 @@ urlpatterns = [
     # path('delete/<int:id>', views.deleteData, name="deleteData"),
     # path('add-student', views.addStudent, name="addStudent"),
     path('counter/<int:pk>/', views.counter_detail, name='counter_detail'),
+    path('search/', views.global_search, name='global_search'),
+    # path('persons/<int:pk>/', views.person_detail, name='persons_detail'),
+    # path('counters/<int:pk>/', views.counters_detail, name='counters_detail'),
+    # path('watercons/<int:pk>/', views.watercons_detail, name='watercons_detail'),
+    # path('paids/<int:pk>/', views.paids_detail, name='paids_detail'),
+    # path('fields/<int:pk>/', views.fields_detail, name='fields_detail'),    
 ]
 

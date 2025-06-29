@@ -1,0 +1,40 @@
+{% extends 'main.html' %}
+{% block content %}
+<div class="container mt-4">
+  <h4>Αποτελέσματα για: <strong>{{ query }}</strong></h4>
+
+  <table class="table table-striped table-hover table-bordered mt-3 align-middle">
+    <thead class="table-primary">
+      <tr>
+        <th>📁 Πίνακας</th>
+        <th>🏷️ Πεδίο</th>
+        <th>📌 Τιμή</th>
+        <th>🆔 ID</th>
+        <th>🔗 Σύνδεσμος</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for result in results %}
+        <tr>
+          <td>{{ result.model }}</td>
+          <td>{{ result.field }}</td>
+          <td>{{ result.value }}</td>
+          <td>{{ result.id }}</td>
+          <td>
+            {% if result.url %}
+              <a href="{{ result.url }}" class="btn btn-sm btn-outline-primary" target="_blank">Προβολή</a><br>
+              <small class="text-muted">{{ result.string }}</small>
+            {% else %}
+              <span class="text-muted">Δεν υπάρχει σύνδεσμος</span>
+            {% endif %}
+          </td>
+        </tr>
+      {% empty %}
+        <tr>
+          <td colspan="5" class="text-center text-danger">🚫 Δεν βρέθηκαν αποτελέσματα.</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

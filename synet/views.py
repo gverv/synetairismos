@@ -3,9 +3,9 @@ from django.contrib import messages
 from .models import Counters, Persons, WaterCons, Fields, Paids
 from .forms import WaterConsForm, UserForm, PersonsForm, CountersForm, PaidsForm
 from django.views.generic import UpdateView, CreateView
-from django.urls import reverse_lazy
+from django.urls import reverse_lazy, reverse
 from django.http import JsonResponse
-from django.db.models import Sum
+from django.db.models import Sum, Q
 
 def report_view(request):
     # Φιλτράρουμε τα άτομα που έχουν υπόλοιπο διαφορετικό από 0
@@ -222,3 +222,40 @@ def counter_detail(request, pk):
         'consumptions': consumptions
     })
     
+
+def global_search(request):
+    query = request.GET.get('q', '').strip()
+    results = []
+
+    if query:
+        results += search_model(Persons, ['surname', 'name', 'fathersName', 'afm', 'phone', 'notes'], query, 'Πελάτες')
+        results += search_model(Counters, ['collecter', 'counter'], query, 'Μετρητές')
+        results += search_model(WaterCons, ['viberMsg', 'notes'], query, 'Ποτίσματα')
+        results += search_model(Paids, ['receiptNumber'], query, 'Αποδείξεις')
+        results += search_model(Fields, ['field'], query, 'Χωράφια')
+
+    return render(request, 'search_results.html', {'results': results, 'query': query})
+
+
+def search_model(model, fields, query, model_name):
+    found = []
+    for field in fields:
+        kwargs = {f"{field}__icontains": query}
+        for obj in model.objects.filter(**kwargs):
+            value = getattr(obj, field, '')
+            url = get_object_url(obj)
+            found.append({
+                'model': model_name,
+                'field': field,
+                'value': value,
+                'id': obj.id,
+                'string': str(obj),
+                'url': url,
+            })
+    return found
+
+def get_object_url(obj):
+    try:
+        return reverse(f"{obj._meta.model_name}_detail", args=[obj.id])
+    except:
+        return None

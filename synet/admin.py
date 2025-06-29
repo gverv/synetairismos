@@ -1,10 +1,11 @@
 from django.contrib import admin
 
 # Register your models here.
-from .models import WaterConsumption, WaterCons, Persons, Counters, Paids, Fields, Receivers
+# from .models import WaterConsumption, WaterCons, Persons, Counters, Paids, Fields, Receivers
+from .models import WaterCons, Persons, Counters, Paids, Fields, Receivers
 
 
-admin.site.register(WaterConsumption)
+# admin.site.register(WaterConsumption)
 admin.site.register(WaterCons)
 admin.site.register(Persons)
 admin.site.register(Counters)
