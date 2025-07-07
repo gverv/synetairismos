@@ -26,7 +26,8 @@ def report_view(request):
     return render(request, 'report.html', {'report_data': report_data})
 
 def get_last_final_indication(request, counter_id):
-    last_entry = WaterCons.objects.filter(counter_id=counter_id).order_by('-date').first()
+#    last_entry = WaterCons.objects.filter(counter_id=counter_id).order_by('-date').first()
+    last_entry = WaterCons.objects.filter(counter_id=counter_id).order_by('-date').order_by('-id').first()
     if last_entry:
         return JsonResponse({'finalIndication': last_entry.finalIndication})
     return JsonResponse({'finalIndication': None})
