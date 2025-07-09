@@ -15,5 +15,10 @@
       <button class="btn btn-outline-primary" type="submit">🔍</button>
     </form>
   </div>
+  <form method="post" action="{% url 'logout' %}">
+  {% csrf_token %}
+  <button type="submit">Αποσύνδεση</button>
+</form>
+
 </nav>
 

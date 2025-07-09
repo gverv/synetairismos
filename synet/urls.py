@@ -1,8 +1,11 @@
 from django.urls import path
 from . import views
 from .views import get_last_final_indication, PersonsUpdateView, CountersUpdateView, PaidsUpdateView, WaterConsCreateView, WaterConsUpdateView,  create_payment, report_view
+from django.contrib.auth import views as auth_views
 
 urlpatterns = [
+    path('login/', auth_views.LoginView.as_view(), name='login'),
+    path('logout/', auth_views.LogoutView.as_view(), name='logout'),
     path('index', views.index, name="index"),
     path('', views.index, name="root"),
     path('about', views.about, name="about"),

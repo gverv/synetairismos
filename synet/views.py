@@ -6,6 +6,9 @@ from django.views.generic import UpdateView, CreateView
 from django.urls import reverse_lazy, reverse
 from django.http import JsonResponse
 from django.db.models import Sum, Q
+from django.contrib.auth.mixins import PermissionRequiredMixin
+from django.contrib.auth.decorators import permission_required
+# ...existing code...
 
 def report_view(request):
     # Φιλτράρουμε τα άτομα που έχουν υπόλοιπο διαφορετικό από 0
@@ -95,7 +98,8 @@ def customers(request):
     return render(request, 'customers.html', context)
 
 
-class PersonsUpdateView(UpdateView):
+class PersonsUpdateView(PermissionRequiredMixin, UpdateView):
+    permission_required = 'synet.change_model'
     model = Persons
     form_class = PersonsForm
     template_name = 'persons_update.html'
@@ -110,7 +114,8 @@ def counters(request):
     context = {'data': data, 'order': 'asc' if order == 'desc' else 'desc'}
     return render(request, 'counters.html', context)
 
-class CountersUpdateView(UpdateView):
+class CountersUpdateView(PermissionRequiredMixin, UpdateView):
+    permission_required = 'synet.change_model'
     model = Counters
     form_class = CountersForm
     template_name = 'counters_update.html'  # Το όνομα του template
@@ -126,12 +131,14 @@ def paids(request):
     context = {'data': data, 'order': 'asc' if order == 'desc' else 'desc'}
     return render(request, 'paids.html', context)
 
-class PaidsUpdateView(UpdateView):
+class PaidsUpdateView(PermissionRequiredMixin, UpdateView):
+    permission_required = 'synet.change_model'
     model = Paids
     form_class = PaidsForm
     template_name = 'paids_update.html'  # Το όνομα του template
     success_url = reverse_lazy('paids')  # Ανακατεύθυνση μετά την ενημέρωση
 
+@permission_required('synet.change_model', raise_exception=True)
 def paids_update(request, id):
     paid = get_object_or_404(Paids, id=id)
     if request.method == "POST":
@@ -144,13 +151,15 @@ def paids_update(request, id):
         form = PaidsForm(instance=paid)
     return render(request, 'paids_update.html', {'form': form})
 
-class WaterConsCreateView(CreateView):
+class WaterConsCreateView(PermissionRequiredMixin, CreateView):
+    permission_required = 'synet.change_model'
     model = WaterCons
     form_class = WaterConsForm
     template_name = 'add_irrigation.html'
     success_url = reverse_lazy('index')  # Ανακατεύθυνση μετά την προσθήκη
 
-class WaterConsUpdateView(UpdateView):
+class WaterConsUpdateView(PermissionRequiredMixin, UpdateView):
+    permission_required = 'synet.change_model'
     model = WaterCons
     form_class = WaterConsForm
     template_name = 'update_irrigation.html'
@@ -162,6 +171,7 @@ def addPayFromIrrigation(request, irrigation_id):
     return render(request, 'addPayFromIrrigation.html', context)
 
 
+@permission_required('synet.change_model', raise_exception=True)
 def create_payment(request, irrigation_id):
     irrigation = get_object_or_404(WaterCons, id=irrigation_id)
 
@@ -209,6 +219,7 @@ def create_payment(request, irrigation_id):
     return render(request, 'create_payment.html', context)
 
 
+@permission_required('synet.change_model', raise_exception=True)
 def update_irrigation(request, irrigation_id):
     waterCons = get_object_or_404(WaterCons, id=irrigation_id)
     form = WaterConsForm(instance=waterCons)

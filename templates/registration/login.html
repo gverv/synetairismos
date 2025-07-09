@@ -1,0 +1,17 @@
+<!-- templates/registration/login.html -->
+{% extends 'main.html' %}
+
+{% block content %}
+  <h2>Σύνδεση</h2>
+  {% if form.errors %}
+    <p style="color: red;">Τα στοιχεία είναι λάθος. Προσπάθησε ξανά.</p>
+  {% endif %}
+
+  <form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Σύνδεση</button>
+  </form>
+
+  {% comment %} <p>Δεν έχεις λογαριασμό; <a href="{% url 'signup' %}">Κάνε εγγραφή</a></p> {% endcomment %}
+{% endblock %}

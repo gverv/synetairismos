@@ -57,8 +57,13 @@
     
 </head>
 <body>
-    
-    {% include "navbar.html" %}
+    {% if user.is_authenticated %}
+        {% include "navbar.html" %}
+    {% else %}
+    <script>
+        window.location.href = "{% url 'login' %}";
+    </script>
+    {% endif %}
     {% if messages %}
     <ul class="messages">
         {% for message in messages %}
