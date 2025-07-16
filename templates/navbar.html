@@ -5,8 +5,6 @@
       <a class="navbar-brand" href="/customers/">Καταναλωτές</a>
       <a class="navbar-brand" href="/counters/">Μετρητές</a>
       <a class="navbar-brand" href="/paids/">Πληρωμές</a>
-      <a class="navbar-brand" href="#"></a>
-      <a class="navbar-brand" href="#"></a>
       <a class="navbar-brand" href="/report/">Αναφορά</a>
       <a class="navbar-brand" href="/add-irrigation/">Προσθήκη Ποτισμού</a>
     </div>
@@ -14,11 +12,10 @@
       <input class="form-control me-2" type="search" name="q" placeholder="Αναζήτηση..." aria-label="Αναζήτηση">
       <button class="btn btn-outline-primary" type="submit">🔍</button>
     </form>
+    <form method="post" action="{% url 'logout' %}" class="ms-3 mb-0">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-outline-danger">Αποσύνδεση</button>
+    </form>
   </div>
-  <form method="post" action="{% url 'logout' %}">
-  {% csrf_token %}
-  <button type="submit">Αποσύνδεση</button>
-</form>
-
 </nav>
 

@@ -130,3 +130,4 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 DATE_INPUT_FORMATS = ['%Y-%m-%d', '%d-%m-%Y', '%d/%m/%Y']
+CSRF_FAILURE_VIEW = 'django.views.csrf.csrf_failure'
