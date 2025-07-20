@@ -3,3 +3,4 @@ backup/
 ypoloipa/
 migrations/
 export.sql
+settings.py
