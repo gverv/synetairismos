@@ -81,19 +81,37 @@ WSGI_APPLICATION = 'synetairismos.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
+# Local development database (SQLite)
 # DATABASES = {
 #     'default': {
 #         'ENGINE': 'django.db.backends.sqlite3',
 #         'NAME': BASE_DIR / 'db.sqlite3',
 #     }
 # }
+
+# Local development database (MySQL)
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.mysql',
+#         'NAME': 'gverv$synet',
+#         'USER': 'gverv$synet',
+#         'PASSWORD': 'pefkos@@1932',
+#         'HOST': 'localhost',
+#         'PORT': '3306',
+#         'OPTIONS': {
+#             'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
+#         },
+#     }
+# }
+
+# PythonAnywhere production database
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'gverv$synet',
-        'USER': 'gverv$synet',
-        'PASSWORD': 'pefkos@@1932',  # Βάλε εδώ το password σου
-        'HOST': 'localhost',
+        'USER': 'gverv',
+        'PASSWORD': 'pefkos@@1932',  # Βάλε εδώ το password της PythonAnywhere βάσης
+        'HOST': 'gverv.mysql.pythonanywhere-services.com',
         'PORT': '3306',
         'OPTIONS': {
             'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
