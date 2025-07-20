@@ -116,14 +116,24 @@ mysql -ugverv -p'pefkos@@1932' -hgverv.mysql.pythonanywhere-services.com 'gverv$
 mysql -u gverv -p"pefkos@@1932" -h gverv.mysql.pythonanywhere-services.com "gverv\$synet" < /home/gverv/synetairismos_export.sql
 ```
 
-### 8. Django migrations
+### 8. Django migrations και έλεγχος sessions
 Μετά την εισαγωγή, εκτέλεσε στο PythonAnywhere:
 
 ```bash
 cd /home/gverv/synetairismos
 python3.10 manage.py makemigrations
 python3.10 manage.py migrate
+python3.10 manage.py migrate --run-syncdb  # Για να βεβαιωθείς ότι οι πίνακες sessions υπάρχουν
 python3.10 manage.py collectstatic --noinput
+```
+
+**Έλεγχος της βάσης δεδομένων:**
+```bash
+python3.10 manage.py shell
+# Στο Django shell:
+>>> from django.contrib.sessions.models import Session
+>>> Session.objects.count()  # Πρέπει να επιστρέψει αριθμό (ακόμα και 0)
+>>> exit()
 ```
 
 ### 9. Ρύθμιση Web App στο PythonAnywhere
@@ -174,6 +184,31 @@ application = get_wsgi_application()
 - User: gverv
 - Database: gverv$synet
 
+## ⚠️ Περιορισμοί PythonAnywhere Free Account:
+
+### Γνωστά προβλήματα:
+- **Ταυτόχρονες συνδέσεις:** Μόνο 1 ενεργός χρήστης κάθε φορά
+- **Session conflicts:** Νέα σύνδεση διακόπτει την προηγούμενη
+- **Timeout:** Sessions λήγουν γρήγορα
+- **Browser issues:** Πρόβλημα με cached sessions
+
+### Λύσεις για Free Account:
+1. **Χρήση ενός browser/device κάθε φορά**
+2. **Πάντα logout όταν τελειώνεις**
+3. **Clear sessions τακτικά:**
+   ```bash
+   python3.10 manage.py clearsessions
+   ```
+4. **Incognito mode για testing**
+5. **Αν κολλήσει, περίμενε 5-10 λεπτά**
+
+### Για επαγγελματική χρήση:
+Upgrade σε **Paid account** για:
+- Unlimited concurrent users
+- Better session handling
+- Faster performance
+- No daily CPU limits
+
 ## Troubleshooting Authentication Issues:
 
 ### Αν βλέπεις την αρχική σελίδα Django αντί για την εφαρμογή σου:
@@ -214,6 +249,56 @@ application = get_wsgi_application()
 6. **Έλεγξε τα error logs:**
    - Web tab → **Error log**
    - Αν υπάρχουν errors, διόρθωσέ τα και κάνε reload
+
+### Αν παίρνεις "SessionInterrupted" error:
+
+**Αιτία:** Περιορισμοί του PythonAnywhere FREE account στις ταυτόχρονες συνδέσεις.
+
+**Άμεσες λύσεις:**
+
+1. **Καθαρισμός όλων των sessions:**
+   ```bash
+   cd /home/gverv/synetairismos
+   python3.10 manage.py shell
+   # Στο Django shell:
+   >>> from django.contrib.sessions.models import Session
+   >>> Session.objects.all().delete()
+   >>> exit()
+   ```
+
+2. **Καθαρισμός sessions με command:**
+   ```bash
+   python3.10 manage.py clearsessions
+   ```
+
+3. **Δημιουργία superuser για τεστ:**
+   ```bash
+   python3.10 manage.py createsuperuser
+   # Δώσε: username, email, password
+   ```
+
+4. **Restart της web app:**
+   - Web tab → **Reload** button
+   - Περίμενε 30 δευτερόλεπτα
+
+5. **Χρήση incognito/private browser:**
+   - Άνοιξε την εφαρμογή σε incognito mode
+   - Καθάρισε cookies αν χρειάζεται
+
+**Για Free Account - Καλές πρακτικές:**
+
+- Χρησιμοποίησε μόνο έναν browser/tab κάθε φορά
+- Κάνε logout όταν τελειώνεις
+- Αν κολλήσει, περίμενε 5-10 λεπτά πριν ξαναδοκιμάσεις
+- Κάνε clear sessions τακτικά
+
+**Έλεγχος sessions:**
+```bash
+python3.10 manage.py shell
+>>> from django.contrib.sessions.models import Session
+>>> print(f"Active sessions: {Session.objects.count()}")
+>>> exit()
+```
 
 ### Αν παίρνεις "Access denied" error:
 

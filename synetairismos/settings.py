@@ -157,6 +157,17 @@ USE_TZ = True
 STATIC_URL = '/static/'
 STATIC_ROOT = '/home/gverv/synetairismos/static/'
 
+# Session settings for PythonAnywhere FREE account
+SESSION_ENGINE = 'django.contrib.sessions.backends.db'
+SESSION_COOKIE_AGE = 3600  # 1 hour (μικρότερο για free account)
+SESSION_COOKIE_SECURE = False  # Set to True if using HTTPS
+SESSION_COOKIE_HTTPONLY = True
+SESSION_SAVE_EVERY_REQUEST = False  # False για λιγότερο load
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True  # True για free account
+SESSION_COOKIE_NAME = 'synet_sessionid'  # Unique name
+SESSION_COOKIE_DOMAIN = None
+SESSION_COOKIE_PATH = '/'
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
