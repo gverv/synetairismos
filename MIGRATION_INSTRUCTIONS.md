@@ -22,7 +22,7 @@ cd synetairismos
 ```bash
 cd /home/gverv
 # Αντικατάστησε το YOUR_TOKEN με το δικό σου token από GitHub
-git clone https://YOUR_TOKEN@github.com/gverv/synetairismos.git
+git clone https://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@github.com/gverv/synetairismos.git
 cd synetairismos
 ```
 
@@ -123,16 +123,46 @@ mysql -u gverv -p"pefkos@@1932" -h gverv.mysql.pythonanywhere-services.com "gver
 cd /home/gverv/synetairismos
 python3.10 manage.py makemigrations
 python3.10 manage.py migrate
-python3.10 manage.py collectstatic
+python3.10 manage.py collectstatic --noinput
 ```
 
 ### 9. Ρύθμιση Web App στο PythonAnywhere
-- Πήγαινε στο **Web** tab
-- Δημιούργησε νέα web app (Django)
-- Στο **Code** section:
-  - Source code: `/home/gverv/synetairismos`
-  - Working directory: `/home/gverv/synetairismos`
-- Στο **WSGI configuration file** ενημέρωσε το path προς το project
+
+**Βήμα 1: Δημιουργία Web App**
+- Πήγαινε στο **Web** tab στο PythonAnywhere dashboard
+- Αν δεν έχεις web app: **Add a new web app** → **Manual configuration** → **Python 3.10**
+- Αν έχεις ήδη web app: **Delete** την παλιά και δημιούργησε νέα
+
+**Βήμα 2: Ρύθμιση Code section**
+- **Source code:** `/home/gverv/synetairismos`
+- **Working directory:** `/home/gverv/synetairismos`
+
+**Βήμα 3: Ρύθμιση WSGI configuration file**
+Κάνε κλικ στο **WSGI configuration file** link και αντικατάστησε ΟΛΟ το περιεχόμενο με:
+
+```python
+import os
+import sys
+
+# Add your project directory to the sys.path
+path = '/home/gverv/synetairismos'
+if path not in sys.path:
+    sys.path.insert(0, path)
+
+os.environ['DJANGO_SETTINGS_MODULE'] = 'synetairismos.settings'
+
+from django.core.wsgi import get_wsgi_application
+application = get_wsgi_application()
+```
+
+**Βήμα 4: Ρύθμιση Static files**
+Στο **Static files** section:
+- URL: `/static/`
+- Directory: `/home/gverv/synetairismos/static/`
+
+**Βήμα 5: Ρύθμιση Virtualenv (προαιρετικό)**
+Αν χρησιμοποιείς virtualenv:
+- **Virtualenv:** `/home/gverv/.local`
 
 ### 10. Δοκιμή της εφαρμογής
 - Ανανέωσε την web app από το Web tab
@@ -145,6 +175,45 @@ python3.10 manage.py collectstatic
 - Database: gverv$synet
 
 ## Troubleshooting Authentication Issues:
+
+### Αν βλέπεις την αρχική σελίδα Django αντί για την εφαρμογή σου:
+
+**Πρόβλημα:** Το PythonAnywhere δείχνει "The install worked successfully! Congratulations!" αντί για την εφαρμογή σου.
+
+**Λύση:**
+
+1. **Έλεγξε το WSGI configuration file:**
+   - Web tab → WSGI configuration file
+   - Πρέπει να περιέχει τον σωστό path προς το project σου
+   - Αντικατάστησε το περιεχόμενο με τον κώδικα από το Βήμα 3 παραπάνω
+
+2. **Έλεγξε τα paths:**
+   ```bash
+   # Στο Bash console:
+   cd /home/gverv/synetairismos
+   ls -la  # Πρέπει να βλέπεις το manage.py
+   python3.10 manage.py check  # Έλεγχος για errors
+   ```
+
+3. **Έλεγξε το settings.py:**
+   ```bash
+   cd /home/gverv/synetairismos
+   python3.10 -c "import synetairismos.settings; print('Settings OK')"
+   ```
+
+4. **Ρύθμισε το ALLOWED_HOSTS στο settings.py:**
+   Προσθήκη στο settings.py:
+   ```python
+   ALLOWED_HOSTS = ['gverv.pythonanywhere.com', 'localhost', '127.0.0.1']
+   ```
+
+5. **Reload την Web App:**
+   - Web tab → **Reload** button
+   - Περίμενε να ολοκληρωθεί το reload
+
+6. **Έλεγξε τα error logs:**
+   - Web tab → **Error log**
+   - Αν υπάρχουν errors, διόρθωσέ τα και κάνε reload
 
 ### Αν παίρνεις "Access denied" error:
 
