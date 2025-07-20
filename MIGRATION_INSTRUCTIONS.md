@@ -36,17 +36,27 @@ pip3.10 install --user django mysqlclient django-crispy-forms crispy-bootstrap4
 ```
 
 ### 4. Σύνδεση με τη βάση δεδομένων
-Άνοιξε ένα **Bash console** στο PythonAnywhere και εκτέλεσε:
+Άνοιξε ένα **Bash console** στο PythonAnywhere και δοκίμασε μία από τις παρακάτω εντολές:
 
+**Επιλογή 1 (με password στην εντολή):**
 ```bash
 mysql -u gverv -p'pefkos@@1932' -h gverv.mysql.pythonanywhere-services.com 'gverv$synet'
 ```
 
-### 4. Σύνδεση με τη βάση δεδομένων
-Στο **Bash console**:
-
+**Επιλογή 2 (χωρίς κενά μετά το -p):**
 ```bash
-mysql -u gverv -p'pefkos@@1932' -h gverv.mysql.pythonanywhere-services.com 'gverv$synet'
+mysql -ugverv -p'pefkos@@1932' -hgverv.mysql.pythonanywhere-services.com 'gverv$synet'
+```
+
+**Επιλογή 3 (interactive password prompt):**
+```bash
+mysql -u gverv -p -h gverv.mysql.pythonanywhere-services.com 'gverv$synet'
+# Θα σε ρωτήσει για password - γράψε: pefkos@@1932
+```
+
+**Επιλογή 4 (με escape characters):**
+```bash
+mysql -u gverv -p"pefkos@@1932" -h gverv.mysql.pythonanywhere-services.com "gverv\$synet"
 ```
 
 ### 5. Εισαγωγή δεδομένων
@@ -63,9 +73,16 @@ SELECT COUNT(*) FROM synet_persons;
 SELECT COUNT(*) FROM synet_counters;
 ```
 
-### 7. Εναλλακτικά μέσω bash
+### 7. Εναλλακτικά μέσω bash (απευθείας εισαγωγή)
 ```bash
+# Επιλογή 1:
 mysql -u gverv -p'pefkos@@1932' -h gverv.mysql.pythonanywhere-services.com 'gverv$synet' < /home/gverv/synetairismos_export.sql
+
+# Επιλογή 2:
+mysql -ugverv -p'pefkos@@1932' -hgverv.mysql.pythonanywhere-services.com 'gverv$synet' < /home/gverv/synetairismos_export.sql
+
+# Επιλογή 3 (με escape):
+mysql -u gverv -p"pefkos@@1932" -h gverv.mysql.pythonanywhere-services.com "gverv\$synet" < /home/gverv/synetairismos_export.sql
 ```
 
 ### 8. Django migrations
@@ -95,3 +112,30 @@ python3.10 manage.py collectstatic
 - Host: gverv.mysql.pythonanywhere-services.com
 - User: gverv
 - Database: gverv$synet
+
+## Troubleshooting Authentication Issues:
+
+### Αν παίρνεις "Access denied" error:
+
+1. **Έλεγξε τα στοιχεία σύνδεσης:**
+   - Username: `gverv` (όχι `gverv$synet`)
+   - Password: `pefkos@@1932`
+   - Host: `gverv.mysql.pythonanywhere-services.com`
+   - Database: `gverv$synet`
+
+2. **Δοκίμασε στο PythonAnywhere MySQL console:**
+   - Πήγαινε στο **Databases** tab στο dashboard
+   - Κάνε κλικ στο **Open MySQL console**
+   - Αυτό θα σε συνδέσει αυτόματα χωρίς authentication
+
+3. **Χρησιμοποίησε το database name με escape:**
+   ```bash
+   mysql -u gverv -p -h gverv.mysql.pythonanywhere-services.com
+   # Μετά τη σύνδεση:
+   USE `gverv$synet`;
+   ```
+
+4. **Έλεγξε αν η βάση υπάρχει:**
+   ```sql
+   SHOW DATABASES;
+   ```
