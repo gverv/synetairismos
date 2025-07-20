@@ -91,7 +91,7 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'gverv$synet',
-        'USER': 'gverv$synet',
+        'USER': 'gverv',
         'PASSWORD': 'pefkos@@1932',  # Βάλε εδώ το password σου
         'HOST': 'localhost',
         'PORT': '3306',
