@@ -9,11 +9,42 @@
 ### 1. Clone του Git repository
 Άνοιξε ένα **Bash console** στο PythonAnywhere και εκτέλεσε:
 
+**Επιλογή 1 - Public clone (Προτεινόμενο):**
 ```bash
 cd /home/gverv
 git clone https://github.com/gverv/synetairismos.git
 cd synetairismos
 ```
+
+**Αν παίρνεις authentication error, δοκίμασε:**
+
+**Επιλογή 2 - Με Personal Access Token (για private repo):**
+```bash
+cd /home/gverv
+# Αντικατάστησε το YOUR_TOKEN με το δικό σου token από GitHub
+git clone https://YOUR_TOKEN@github.com/gverv/synetairismos.git
+cd synetairismos
+```
+
+**Πώς να δημιουργήσεις Personal Access Token:**
+1. GitHub → Settings → Developer settings → Personal access tokens → Tokens (classic)
+2. Generate new token (classic)
+3. Επίλεξε scope: `repo` (Full control of private repositories)
+4. Copy το token και χρησιμοποίησέ το στη παραπάνω εντολή
+
+**Επιλογή 3 - SSH (αν έχεις SSH key):**
+```bash
+cd /home/gverv
+git clone git@github.com:gverv/synetairismos.git
+cd synetairismos
+```
+
+**Επιλογή 4 - Download ZIP:**
+Αν το Git clone δεν δουλεύει:
+- Πήγαινε στο https://github.com/gverv/synetairismos
+- Κάνε κλικ στο **Code** → **Download ZIP**
+- Ανέβασε το ZIP στο PythonAnywhere
+- Εκτέλεσε: `unzip synetairismos-main.zip && mv synetairismos-main synetairismos`
 
 ### 2. Ανέβασμα του SQL αρχείου
 - Μπες στο PythonAnywhere dashboard
@@ -139,3 +170,48 @@ python3.10 manage.py collectstatic
    ```sql
    SHOW DATABASES;
    ```
+
+## Troubleshooting Git Clone Issues:
+
+### Για private repository - Git Authentication στο PythonAnywhere:
+
+**Καλύτερη λύση - Personal Access Token:**
+
+1. **Δημιούργησε Personal Access Token:**
+   - GitHub → Settings (profile) → Developer settings
+   - Personal access tokens → Tokens (classic)
+   - Generate new token (classic)
+   - Scope: τσέκαρε `repo` (Full control of private repositories)
+   - Copy το token
+
+2. **Clone με το token:**
+   ```bash
+   cd /home/gverv
+   git clone https://YOUR_GITHUB_TOKEN@github.com/gverv/synetairismos.git
+   cd synetairismos
+   ```
+
+**Εναλλακτικές λύσεις:**
+
+1. **Κάνε το repository public προσωρινά:**
+   - GitHub → Repository Settings → Danger Zone
+   - Change visibility → Make public
+   - Κάνε το clone στο PythonAnywhere
+   - Κάνε το ξανά private
+
+2. **SSH Keys (πιο περίπλοκο):**
+   ```bash
+   # Δημιουργία SSH key στο PythonAnywhere
+   ssh-keygen -t ed25519 -C "your-email@example.com"
+   cat ~/.ssh/id_ed25519.pub  # Copy αυτό στο GitHub SSH keys
+   git clone git@github.com:gverv/synetairismos.git
+   ```
+
+3. **Download ZIP method:**
+   - GitHub → Code → Download ZIP
+   - Upload στο PythonAnywhere Files
+   - `unzip synetairismos-main.zip && mv synetairismos-main synetairismos`
+
+4. **Upload μεμονωμένα αρχεία:**
+   - Upload όλα τα αρχεία του project μέσω Files tab
+   - Δημιούργησε τη δομή φακέλων χειροκίνητα
