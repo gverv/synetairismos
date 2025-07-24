@@ -17,7 +17,7 @@ NC='\033[0m' # No Color
 print_status() {
     echo -e "${GREEN}[INFO]${NC} $1"
 }
-
+# 
 print_warning() {
     echo -e "${YELLOW}[WARNING]${NC} $1"
 }
@@ -39,7 +39,7 @@ sudo apt update && sudo apt upgrade -y
 
 # Install required packages
 print_status "Installing required packages..."
-sudo apt install -y python3 python3-pip python3-venv git nginx mysql-server
+sudo apt install -y python3 python3-pip python3-venv git nginx mysql-server ufw
 sudo apt install -y python3-dev default-libmysqlclient-dev build-essential pkg-config
 
 # Configure MySQL if not already done
@@ -174,9 +174,51 @@ fi
 
 # Configure firewall
 print_status "Configuring firewall..."
-sudo ufw --force enable
-sudo ufw allow ssh
-sudo ufw allow 'Nginx Full'
+if command -v ufw >/dev/null 2>&1; then
+    print_status "Using UFW firewall..."
+    sudo ufw --force enable
+    sudo ufw allow ssh
+    sudo ufw allow 'Nginx Full'
+    sudo ufw status
+elif command -v firewall-cmd >/dev/null 2>&1; then
+    print_status "Using firewalld..."
+    sudo firewall-cmd --permanent --add-service=ssh
+    sudo firewall-cmd --permanent --add-service=http
+    sudo firewall-cmd --permanent --add-service=https
+    sudo firewall-cmd --reload
+    sudo firewall-cmd --list-all
+else
+    print_warning "No firewall manager found (ufw/firewalld)"
+    print_status "Using iptables directly..."
+    
+    # Allow SSH (port 22)
+    sudo iptables -A INPUT -p tcp --dport 22 -j ACCEPT
+    
+    # Allow HTTP (port 80)
+    sudo iptables -A INPUT -p tcp --dport 80 -j ACCEPT
+    
+    # Allow HTTPS (port 443)
+    sudo iptables -A INPUT -p tcp --dport 443 -j ACCEPT
+    
+    # Allow established connections
+    sudo iptables -A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
+    
+    # Allow loopback
+    sudo iptables -A INPUT -i lo -j ACCEPT
+    
+    # Save iptables rules (Oracle Linux/RHEL style)
+    if [ -f /etc/redhat-release ]; then
+        sudo service iptables save 2>/dev/null || true
+    else
+        # Ubuntu/Debian style
+        sudo iptables-save > /etc/iptables/rules.v4 2>/dev/null || sudo mkdir -p /etc/iptables && sudo iptables-save | sudo tee /etc/iptables/rules.v4 >/dev/null
+    fi
+    
+    print_status "iptables rules configured"
+    sudo iptables -L
+fi
+
+print_status "Firewall configuration completed"
 
 print_status "🎉 Deployment completed successfully!"
 echo ""

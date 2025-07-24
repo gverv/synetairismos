@@ -148,7 +148,7 @@ EXIT;
 ```bash
 # As synet user
 cd /home/synet
-git clone https://github.com/gverv/synetairismos.git
+# git clone https://github.com/gverv/synetairismos.git
 cd synetairismos
 
 # Create virtual environment
