@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Oracle Cloud Django Deployment Script
+# Oracle Cloud Django Deployment Script 
 # Run this on your Oracle Cloud VM after basic setup
 
 set -e  # Exit on any error

@@ -1,4 +1,4 @@
--- MySQL dump 10.13  Distrib 9.3.0, for Win64 (x86_64)
+-- MySQL dump 10.13  Distrib 9.3.0, for Win64 (x86_64) 
 --
 -- Host: localhost    Database: gverv$synet
 -- ------------------------------------------------------

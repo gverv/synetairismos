@@ -1,4 +1,4 @@
-# Oracle Cloud Always Free - Django Deployment Guide
+# Oracle Cloud Always Free - Django Deployment Guide 
 
 ## Γιατί Oracle Cloud Always Free;
 - ✅ **Πραγματικά ALWAYS FREE** (όχι trial)

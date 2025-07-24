@@ -1,4 +1,4 @@
-# Οδηγίες Μεταφοράς MySQL στο PythonAnywhere
+# Οδηγίες Μεταφοράς MySQL στο PythonAnywhere 
 
 ## Βήματα που έχουν ολοκληρωθεί:
 ✅ Εξαγωγή βάσης δεδομένων στο αρχείο `synetairismos_export.sql`
