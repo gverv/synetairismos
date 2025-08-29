@@ -50,8 +50,8 @@
                     <td><a type="button" href="/update-irrigation/{{d.id}}" class="btn btn-warning">Edit</a></td>
                     {% if d.receipt %}
                       <td><a href="{% url 'paids_update' d.receipt.id %}" class="btn btn-primary">Απόδειξη</a></td>
-                    {% else %}
-                      <td><a href="{% url 'create_payment' d.id %}" class="btn btn-success">Δημιουργία</a></td>
+                    {% comment %} {% else %}
+                      <td><a href="{% url 'create_payment' d.id %}" class="btn btn-success">Δημιουργία</a></td> {% endcomment %}
                     {% endif %}
                     {% comment %} <td><a type="button"  href="/delete/{{d.id}}"  class="btn btn-danger">Delete</a></td> {% endcomment %}
                   </tr>

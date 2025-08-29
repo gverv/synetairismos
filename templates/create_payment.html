@@ -1,40 +1,51 @@
 {% extends "main.html" %}
 {% load crispy_forms_tags %}
-
 {% block content %}
 <div class="container mt-5">
-    <h2>Έκδοση Απόδειξης</h2>
-    <form method="post">
-        {% csrf_token %}
-        {{ form|crispy }}
-        
-        <button type="button" class="btn btn-primary" id="fillPayment">Πληρωμή</button>
-        <button type="submit" class="btn btn-success">Αποθήκευση</button>
-    </form>
+  <h2>Έκδοση Απόδειξης</h2>
+  <form method="post" id="receiptForm">
+    {% csrf_token %}
+    {{ form|crispy }}
+    <button type="button" class="btn btn-primary" id="fillPayment">Πληρωμή</button>
+    <button type="submit" class="btn btn-success" id="saveBtn">Αποθήκευση</button>
+  </form>
 </div>
 
-<script>
-    document.addEventListener("DOMContentLoaded", function() {
-        let costField = document.querySelector("[name='cost']");
-        let paidField = document.querySelector("[name='paid']");
-        let balanceField = document.querySelector("[name='balance']");
-        let paymentDateField = document.querySelector("[name='paymentDate']");
-        let receiverField = document.querySelector("[name='receiver']");
-        
-        // Αυτόματος υπολογισμός του balance
-        paidField.addEventListener("input", function() {
-            let paidValue = parseFloat(paidField.value) || 0;
-            let costValue = parseFloat(costField.value) || 0;
-            balanceField.value = (paidValue - costValue).toFixed(2);
-        });
+<style>
+  /* Στυλ για το κουμπί όταν έχει focus */
+  #saveBtn:focus {
+    outline: 3px solid #28a745;   /* πράσινο περίγραμμα */
+    outline-offset: 3px;
+    box-shadow: 0 0 8px #28a745; /* πράσινη λάμψη */
+  }
+</style>
 
-        // Προεπιλεγμένες τιμές με το κουμπί "Πληρωμή"
-        document.getElementById("fillPayment").addEventListener("click", function() {
-            paidField.value = costField.value;  // Πλήρωσε = Κόστος
-            balanceField.value = 0;  // Ισοζύγιο = Πλήρωσε - Κόστος (0)
-            paymentDateField.value = new Date().toISOString().slice(0, 10);  // Τρέχουσα ημερομηνία
-            receiverField.value = 1;  // ID Εισπράκτορα = 1
-        });
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    let costField = document.querySelector("[name='cost']");
+    let paidField = document.querySelector("[name='paid']");
+    let balanceField = document.querySelector("[name='balance']");
+    let paymentDateField = document.querySelector("[name='paymentDate']");
+    let receiverField = document.querySelector("[name='receiver']");
+    let saveBtn = document.getElementById("saveBtn");
+
+    // Αυτόματος υπολογισμός του balance
+    paidField.addEventListener("input", function() {
+        let paidValue = parseFloat(paidField.value) || 0;
+        let costValue = parseFloat(costField.value) || 0;
+        balanceField.value = (paidValue - costValue).toFixed(2);
     });
+
+    // Προεπιλεγμένες τιμές με το κουμπί "Πληρωμή"
+    document.getElementById("fillPayment").addEventListener("click", function() {
+        paidField.value = costField.value;
+        balanceField.value = 0;
+        paymentDateField.value = new Date().toISOString().slice(0, 10);
+        receiverField.value = 1;
+    });
+
+    // Με το φόρτωμα της σελίδας, focus στο κουμπί "Αποθήκευση"
+    saveBtn.focus();
+});
 </script>
 {% endblock %}
