@@ -4,7 +4,7 @@ ypoloipa/
 migrations/
 export.sql
 settings.py
-# synetairismos/settings.py
+synetairismos/settings.py
 *.db
 *.sqlite3
 *.log
