@@ -8,30 +8,49 @@
 
 {% block content %}
 
-<h2 class="my-4">Καταναλώσεις για το ρολόι <strong>{{ counter.counter }}</strong></h2>
-<div class="table-responsive">
-    <table class="table table-bordered table-hover align-middle shadow-sm">
-        <thead>
-            <tr>
-                <th>Πελάτης</th>
-                <th>Ημερομηνία</th>
-                <th>Τελική Ένδειξη</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for cons in consumptions %}
-            <tr>
-                <td>{{ cons.customer }}</td>
-                <td>{{ cons.date|date:"d/m/Y" }}</td>
-                <td>{{ cons.finalIndication }}</td>
-            </tr>
-            {% empty %}
-            <tr>
-                <td colspan="3" class="text-center">Δεν υπάρχουν καταναλώσεις.</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+<div class="container-fluid mt-4">
+    <h2 style="font-size:1.3rem;" class="mb-3">Καταναλώσεις για το ρολόι <strong>{{ counter.counter }}</strong></h2>
+    <div class="table-responsive">
+            <table class="table table-bordered table-hover align-middle shadow-sm">
+                    <thead>
+                            <tr>
+                                    <th>Πελάτης</th>
+                                    <th>Ημερομηνία</th>
+                                    <th>Τελική Ένδειξη</th>
+                            </tr>
+                    </thead>
+                    <tbody>
+                            {% for cons in consumptions %}
+                            <tr>
+                                    <td>{{ cons.customer }}</td>
+                                    <td>{{ cons.date|date:"d/m/Y" }}</td>
+                                    <td>{{ cons.finalIndication }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                    <td colspan="3" class="text-center">Δεν υπάρχουν καταναλώσεις.</td>
+                            </tr>
+                            {% endfor %}
+                    </tbody>
+            </table>
+    </div>
 </div>
+<style>
+    @media (max-width: 576px) {
+        h2 {
+            font-size: 1.1rem !important;
+        }
+        .container-fluid {
+            padding-left: 5px !important;
+            padding-right: 5px !important;
+        }
+        .table {
+            font-size: 0.95rem;
+        }
+        th, td {
+            padding: 0.3rem;
+        }
+    }
+</style>
 
 {% endblock content %}

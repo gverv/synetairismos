@@ -1,21 +1,37 @@
 {% extends "main.html" %}
 {% load crispy_forms_tags %}
 {% block content %}
-<div class="container mt-5">
-    <h2>Ενημέρωση Ποτίσματος</h2>
-    <form method="post">
-        {% csrf_token %}
-        {{ form|crispy }}
-        <button type="submit" class="btn btn-warning">Ενημέρωση</button>
-{% comment %}         
-        <p> object.receipt: {{ object.receipt }} </p> 
-        <p> object.id: {{ object.id }} </p> 
- {% endcomment %}
-        {% if object.receipt %}
-            <a href="{% url 'paids_update' object.receipt.id %}" class="btn btn-primary">Απόδειξη</a>
-        {% else %}
-            <a href="{% url 'create_payment' object.id %}" class="btn btn-success">Δημιουργία Απόδειξης</a>
-        {% endif %}
-    </form>
+<div class="container-fluid mt-4">
+        <h2 style="font-size:1.3rem;">Ενημέρωση Ποτίσματος</h2>
+        <form method="post">
+                {% csrf_token %}
+                {{ form|crispy }}
+                <div class="d-flex flex-column flex-md-row gap-2 mt-2">
+                        <button type="submit" class="btn btn-warning">Ενημέρωση</button>
+                        {% if object.receipt %}
+                                <a href="{% url 'paids_update' object.receipt.id %}" class="btn btn-primary">Απόδειξη</a>
+                        {% else %}
+                                <a href="{% url 'create_payment' object.id %}" class="btn btn-success">Δημιουργία Απόδειξης</a>
+                        {% endif %}
+                </div>
+        </form>
 </div>
+<style>
+    @media (max-width: 576px) {
+        h2 {
+            font-size: 1.1rem !important;
+        }
+        .container-fluid {
+            padding-left: 5px !important;
+            padding-right: 5px !important;
+        }
+        .btn {
+            font-size: 0.95rem;
+            padding: 0.4rem 0.7rem;
+        }
+        .mt-2 {
+            margin-top: 0.7rem !important;
+        }
+    }
+</style>
 {% endblock %}

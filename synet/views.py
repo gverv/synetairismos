@@ -64,9 +64,17 @@ def index(request):
     return render(request, 'index.html', context)
 
 def customerIrrigations(request, customer_id):
-    sort_by, order = get_sort_params(request)
-    data = WaterCons.objects.filter(customer_id=customer_id).order_by(sort_by)
-    customerPaids = Paids.objects.filter(customer=customer_id).order_by(sort_by)
+    # Dynamic sorting for irrigations (data)
+    data_sort = request.GET.get('sort', 'id')
+    data_order = request.GET.get('order', 'desc')
+    data_sort_by = f'-{data_sort}' if data_order == 'desc' else data_sort
+    data = WaterCons.objects.filter(customer_id=customer_id).order_by(data_sort_by)
+
+    # Dynamic sorting for payments (customerPaids)
+    paids_sort = request.GET.get('paids_sort', 'receiptNumber')
+    paids_order = request.GET.get('paids_order', 'desc')
+    paids_sort_by = f'-{paids_sort}' if paids_order == 'desc' else paids_sort
+    customerPaids = Paids.objects.filter(customer=customer_id).order_by(paids_sort_by)
     customer = get_object_or_404(Persons, id=customer_id)
     aggregates = WaterCons.objects.filter(customer_id=customer_id).aggregate(
         total_cost=Sum('cost'),
@@ -77,12 +85,13 @@ def customerIrrigations(request, customer_id):
     debt = (aggregates['total_cost'] or 0) - total_paid
     context = {
         'data': data,
-        'order': order,
+        'order': data_order,
         'customer': customer,
         **aggregates,
         'customerPaids': customerPaids,
         'total_paid': total_paid,
         'debt': debt,
+        'paids_order': paids_order,
     }
     return render(request, 'customerIrrigations.html', context)
 
@@ -114,9 +123,11 @@ class CountersUpdateView(PermissionRequiredMixin, UpdateView):
     success_url = reverse_lazy('counters')
 
 def paids(request):
-    sort_by, order = get_sort_params(request, default='-receiptNumber')
-    data = Paids.objects.all().order_by(sort_by)
-    return render(request, 'paids.html', {'data': data, 'order': order})
+    sort_by = request.GET.get('sort', 'receiptNumber')
+    order = request.GET.get('order', 'desc')
+    sort_field = f'-{sort_by}' if order == 'desc' else sort_by
+    data = Paids.objects.all().order_by(sort_field)
+    return render(request, 'paids.html', {'data': data, 'order': order, 'sort_by': sort_by})
 
 class PaidsUpdateView(PermissionRequiredMixin, UpdateView):
     permission_required = 'synet.change_model'

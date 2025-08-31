@@ -9,16 +9,35 @@
 </head>
 <body>
     {% include "navbar.html" %}
-    <div class="container mt-5">
-        <h2>Ενημέρωση Πληρωμής</h2>
-
+    <div class="container-fluid mt-4">
+        <h2 style="font-size:1.3rem;">Ενημέρωση Πληρωμής</h2>
         <form method="post">
             {% csrf_token %}
             {{ form|crispy }}
-            <button type="button" class="btn btn-primary" id="fillPayment">Πληρωμή</button>
-            <button type="submit" class="btn btn-success">Αποθήκευση</button>
+            <div class="d-flex flex-column flex-md-row gap-2 mt-2">
+                <button type="button" class="btn btn-primary" id="fillPayment">Πληρωμή</button>
+                <button type="submit" class="btn btn-success">Αποθήκευση</button>
+            </div>
         </form>
     </div>
+<style>
+    @media (max-width: 576px) {
+        h2 {
+            font-size: 1.1rem !important;
+        }
+        .container-fluid {
+            padding-left: 5px !important;
+            padding-right: 5px !important;
+        }
+        .btn {
+            font-size: 0.95rem;
+            padding: 0.4rem 0.7rem;
+        }
+        .mt-2 {
+            margin-top: 0.7rem !important;
+        }
+    }
+</style>
 </body>
 <script>
     document.addEventListener("DOMContentLoaded", function() {
