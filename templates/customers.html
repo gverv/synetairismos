@@ -1,5 +1,14 @@
 {% extends "main.html" %} 
 
+{% block breadcrumbs %}
+<nav aria-label="breadcrumb" class="bg-light border-bottom px-3 py-2" style="position: sticky; top: 56px; z-index: 1021;">
+  <ol class="breadcrumb mb-0">
+    <li class="breadcrumb-item"><a href="/">Αρχική</a></li>
+    <li class="breadcrumb-item active" aria-current="page">Καταναλωτές</li>
+  </ol>
+</nav>
+{% endblock %}
+
 {% block title %}
 <title>Συνεταιρισμός Πεύκου - Καταναλωτές</title>
 <style>
@@ -32,9 +41,8 @@
 </style>
 {% endblock title %} 
 
-
 {% block content %}
-<div class="container-fluid mt-4">
+<div class="container-fluid mt-2">
   <div class="row">
     <div class="col-12 col-md-8">
             <h4 class="text-center text-white bg-dark p-3">Καταναλωτές</h4>
@@ -62,9 +70,4 @@
         </div>
     </div>
 </div>
-
-
-
-
-
 {% endblock content %}
