@@ -6,6 +6,7 @@ from django.db.models import Sum, Q
 from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.contrib.auth.decorators import permission_required
 from django.views.generic import UpdateView, CreateView
+from django.core.paginator import Paginator
 
 from .models import Counters, Persons, WaterCons, Fields, Paids
 from .forms import WaterConsForm, UserForm, PersonsForm, CountersForm, PaidsForm
@@ -45,7 +46,11 @@ def index(request):
         sort_by = '-id'
     elif sort_by == 'id' and order == 'desc':
         sort_by = '-id'
-    data = WaterCons.objects.all().order_by(sort_by)
+    all_data = WaterCons.objects.all().order_by(sort_by)
+    paginator = Paginator(all_data, 50)  # 50 ανά σελίδα
+    page_number = request.GET.get('page', 1)
+    page_obj = paginator.get_page(page_number)
+
     aggregates = WaterCons.objects.aggregate(
         total_cost=Sum('cost'),
         total_hydronomists=Sum('hydronomistsRight'),
@@ -55,7 +60,7 @@ def index(request):
     total_paid = Paids.objects.aggregate(total_paid=Sum('paid'))['total_paid'] or 0
     debt = (aggregates['total_cost'] or 0) - total_paid
     context = {
-        'data': data,
+        'page_obj': page_obj,
         'order': order,
         **aggregates,
         'total_paid': total_paid,
@@ -126,8 +131,15 @@ def paids(request):
     sort_by = request.GET.get('sort', 'receiptNumber')
     order = request.GET.get('order', 'desc')
     sort_field = f'-{sort_by}' if order == 'desc' else sort_by
-    data = Paids.objects.all().order_by(sort_field)
-    return render(request, 'paids.html', {'data': data, 'order': order, 'sort_by': sort_by})
+    all_data = Paids.objects.all().order_by(sort_field)
+    paginator = Paginator(all_data, 14)  # 14 ανά σελίδα
+    page_number = request.GET.get('page', 1)
+    page_obj = paginator.get_page(page_number)
+    return render(request, 'paids.html', {
+        'page_obj': page_obj,
+        'order': order,
+        'sort_by': sort_by
+    })
 
 class PaidsUpdateView(PermissionRequiredMixin, UpdateView):
     permission_required = 'synet.change_model'
@@ -139,11 +151,26 @@ class PaidsUpdateView(PermissionRequiredMixin, UpdateView):
 @permission_required('synet.change_model', raise_exception=True)
 def paids_update(request, id):
     paid = get_object_or_404(Paids, id=id)
+    # Πάρε τα query params για να τα χρησιμοποιήσεις στο redirect
+    page = request.GET.get('page', '')
+    sort = request.GET.get('sort', '')
+    order = request.GET.get('order', '')
+    query_string = ''
+    if page or sort or order:
+        params = []
+        if page:
+            params.append(f'page={page}')
+        if sort:
+            params.append(f'sort={sort}')
+        if order:
+            params.append(f'order={order}')
+        query_string = '?' + '&'.join(params)
+
     if request.method == "POST":
         form = PaidsForm(request.POST, instance=paid)
         if form.is_valid():
             form.save()
-            return redirect('index')
+            return redirect('/paids/' + query_string)
     else:
         form = PaidsForm(instance=paid)
     return render(request, 'paids_update.html', {'form': form})

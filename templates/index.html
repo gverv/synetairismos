@@ -62,21 +62,21 @@
                   </tr>
                 </thead>
                 <tbody>
-                    {% for d in data %}
+                    {% for obj in page_obj %}
                   {% comment %} <tr class="d-flex align-items-center"> {% endcomment %}
                   <tr class="align-items-center">
-                    {% comment %} <th scope="row">{{d.id}}</th> {% endcomment %}
-                    <td>{{d.id}}</td>
-                    <td>{{d.customer}}</td>
-                    <td>{{ d.date|date:"D, d-m-y" }}</td>
-                    <td>{{d.cubicMeters}}</td>
-                    <td>{{d.billableCubicMeters}}</td>
-                    <td>{{d.cost}}</td>
-                    <td><a type="button" href="/update-irrigation/{{d.id}}" class="btn btn-warning">Edit</a></td>
-                    {% if d.receipt %}
-                      <td><a href="{% url 'paids_update' d.receipt.id %}" class="btn btn-primary">Απόδειξη</a></td>
+                    {% comment %} <th scope="row">{{obj.id}}</th> {% endcomment %}
+                    <td>{{obj.id}}</td>
+                    <td>{{obj.customer}}</td>
+                    <td>{{ obj.date|date:"D, d-m-y" }}</td>
+                    <td>{{obj.cubicMeters}}</td>
+                    <td>{{obj.billableCubicMeters}}</td>
+                    <td>{{obj.cost}}</td>
+                    <td><a type="button" href="/update-irrigation/{{obj.id}}" class="btn btn-warning">Edit</a></td>
+                    {% if obj.receipt %}
+                      <td><a href="{% url 'paids_update' obj.receipt.id %}" class="btn btn-primary">Απόδειξη</a></td>
                     {% else %}
-                      <td><a href="{% url 'create_payment' d.id %}" class="btn btn-success">Δημιουργία</a></td>
+                      <td><a href="{% url 'create_payment' obj.id %}" class="btn btn-success">Δημιουργία</a></td>
                     {% endif %}
                   </tr>
                   {% endfor %}
@@ -85,6 +85,55 @@
         </div>
     </div>
 </div>
+
+
+<nav aria-label="Σελιδοποίηση">
+  <ul class="pagination justify-content-center">
+    {% if page_obj.has_previous %}
+      <li class="page-item">
+        <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if order %}&order={{ order }}{% endif %}" aria-label="Previous">&lt;</a>
+      </li>
+    {% else %}
+      <li class="page-item disabled">
+        <span class="page-link">&lt;</span>
+      </li>
+    {% endif %}
+
+    {% for num in page_obj.paginator.page_range %}
+      {% if num == page_obj.number %}
+        <li class="page-item active" aria-current="page">
+          <span class="page-link">{{ num }}</span>
+        </li>
+      {% elif num <= 2 %}
+        <li class="page-item">
+          <a class="page-link" href="?page={{ num }}{% if order %}&order={{ order }}{% endif %}">{{ num }}</a>
+        </li>
+      {% elif num > page_obj.paginator.num_pages|add:"-2" %}
+        <li class="page-item">
+          <a class="page-link" href="?page={{ num }}{% if order %}&order={{ order }}{% endif %}">{{ num }}</a>
+        </li>
+      {% elif num >= page_obj.number|add:"-2" and num <= page_obj.number|add:"2" %}
+        <li class="page-item">
+          <a class="page-link" href="?page={{ num }}{% if order %}&order={{ order }}{% endif %}">{{ num }}</a>
+        </li>
+      {% elif num == 3 and page_obj.number > 5 %}
+        <li class="page-item disabled"><span class="page-link">...</span></li>
+      {% elif num == page_obj.paginator.num_pages|add:"-2" and page_obj.number < page_obj.paginator.num_pages|add:"-4" %}
+        <li class="page-item disabled"><span class="page-link">...</span></li>
+      {% endif %}
+    {% endfor %}
+
+    {% if page_obj.has_next %}
+      <li class="page-item">
+        <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if order %}&order={{ order }}{% endif %}" aria-label="Next">&gt;</a>
+      </li>
+    {% else %}
+      <li class="page-item disabled">
+        <span class="page-link">&gt;</span>
+      </li>
+    {% endif %}
+  </ul>
+</nav>
 
 
   <script>

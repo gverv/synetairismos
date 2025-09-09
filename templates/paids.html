@@ -34,6 +34,8 @@
 
 
 {% block content %}
+{% comment %} {% include "_pagination.html" %} {% endcomment %}
+
 <div class="container-fluid mt-4">
   <div class="row">
     <div class="col-12 col-md-8">
@@ -51,28 +53,29 @@
                   </tr>
                 </thead>
                 <tbody>
-                    {% for d in data %}
-                  <tr>
-                    <td>{{d.receiptNumber}}</td>
-                    <td>{{d.irrigation}}</td>
-                    <td>{{d.paid}}</td>
-                    <td>{{d.paymentDate}}</td>
-                    <td>{{d.balance}}</td>
-                    {% if d.balance == 0 %}
-                      <td><a type="button" href="/paids/update/{{d.id}}" class="btn btn-primary">Edit</a></td>
-                    {% elif d.balance > 0 %}
-                      <td><a type="button" href="/paids/update/{{d.id}}" class="btn btn-success">Edit</a></td>
-                    {% elif d.balance < 0 %}
-                      <td><a type="button" href="/paids/update/{{d.id}}" class="btn btn-danger">Edit</a></td>
-                    {% else %}
-                      <td><a type="button" href="/paids/update/{{d.id}}" class="btn btn-warning">Edit</a></td>
-                    {% endif %}
-                  </tr>
-                  {% endfor %}
-                </tbody>
-              </table>
-        </div>
-    </div>
+    {% for d in page_obj %}
+    <tr>
+      <td>{{d.receiptNumber}}</td>
+      <td>{{d.irrigation}}</td>
+      <td>{{d.paid}}</td>
+      <td>{{d.paymentDate}}</td>
+      <td>{{d.balance}}</td>
+      {% if d.balance == 0 %}
+        <td><a type="button" href="/paids/update/{{d.id}}?page={{ page_obj.number }}&sort={{ sort_by }}&order={{ order }}" class="btn btn-primary">Edit</a></td>
+      {% elif d.balance > 0 %}
+        <td><a type="button" href="/paids/update/{{d.id}}?page={{ page_obj.number }}&sort={{ sort_by }}&order={{ order }}" class="btn btn-success">Edit</a></td>
+      {% elif d.balance < 0 %}
+        <td><a type="button" href="/paids/update/{{d.id}}?page={{ page_obj.number }}&sort={{ sort_by }}&order={{ order }}" class="btn btn-danger">Edit</a></td>
+      {% else %}
+        <td><a type="button" href="/paids/update/{{d.id}}?page={{ page_obj.number }}&sort={{ sort_by }}&order={{ order }}" class="btn btn-warning">Edit</a></td>
+      {% endif %}
+    </tr>
+    {% endfor %}
+</tbody>
+</table>
+</div>
+</div>
 </div>
 
+{% include "_pagination.html" %}
 {% endblock content %}

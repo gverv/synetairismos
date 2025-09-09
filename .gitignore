@@ -5,6 +5,7 @@ migrations/
 export.sql
 settings.py
 synetairismos/settings.py
+synetairismos/settings.localhost.py
 *.db
 *.sqlite3
 *.log
