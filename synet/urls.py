@@ -1,6 +1,6 @@
 from django.urls import path
 from . import views
-from .views import get_last_final_indication, PersonsUpdateView, CountersUpdateView, PaidsUpdateView, WaterConsCreateView, WaterConsUpdateView,  create_payment, report_view
+from .views import get_last_final_indication, PersonsUpdateView, CountersUpdateView, PaidsUpdateView, WaterConsCreateView, WaterConsUpdateView,  create_payment, report_view, select_persons_for_report
 from django.contrib.auth import views as auth_views
 from django.contrib.auth.views import LogoutView
 
@@ -10,6 +10,7 @@ urlpatterns = [
     path('index', views.index, name="index"),
     path('', views.index, name="root"),
     path('about', views.about, name="about"),
+    path('report/select-persons/', select_persons_for_report, name='select_persons_for_report'),
     path('report/', report_view, name='report'),
     path('customers/', views.customers, name="customers"),
     path('customers/update/<int:pk>/', PersonsUpdateView.as_view(), name='customers_update'),

@@ -21,7 +21,12 @@ def get_sort_params(request, default='-id'):
     return sort_by, 'asc' if order == 'desc' else 'desc'
 
 def report_view(request):
-    persons = Persons.objects.filter(paids__balance__isnull=False).distinct()
+    person_ids = request.GET.get('persons', '')
+    if person_ids:
+        ids = [int(i) for i in person_ids.split(',')]
+        persons = Persons.objects.filter(id__in=ids)
+    else:
+        persons = Persons.objects.none()
     report_data = []
     for person in persons:
         payments = Paids.objects.filter(customer=person).exclude(balance=0)
@@ -277,3 +282,13 @@ def get_object_url(obj):
         return reverse(f"{obj._meta.model_name}_detail", args=[obj.id])
     except:
         return None
+
+
+def select_persons_for_report(request):
+    persons = Persons.objects.filter(isActive=True)
+    if request.method == 'POST':
+        selected = request.POST.getlist('persons')
+        if 'all' in selected:
+            selected = [str(p.id) for p in persons]
+        return redirect(f"/report/?persons={','.join(selected)}")
+    return render(request, 'select_persons.html', {'persons': persons})

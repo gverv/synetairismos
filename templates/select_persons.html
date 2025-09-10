@@ -1,0 +1,33 @@
+{% extends "main.html" %}
+
+{% block title %}
+<title>Συνεταιρισμός Πεύκου Επιλογή για Αναφορά</title>
+{% endblock title %} 
+
+{% block content %}
+<h2>Επιλογή για Αναφορά</h2>
+<form method="post">
+    {% csrf_token %}
+    <label>
+        <input type="checkbox" name="persons" value="all" id="select-all">
+        Όλοι
+    </label>
+    <br>
+    {% for person in persons %}
+        <label>
+            <input type="checkbox" name="persons" value="{{ person.id }}">
+            {{ person }}
+            {% comment %} {{ person.name }} {% endcomment %}
+        </label><br>
+    {% endfor %}
+    <button type="submit" class="btn btn-success">Συνέχεια</button>
+</form>
+<script>
+document.getElementById('select-all').addEventListener('change', function() {
+    const checked = this.checked;
+    document.querySelectorAll('input[name="persons"]').forEach(function(cb) {
+        if (cb.value !== 'all') cb.checked = checked;
+    });
+});
+</script>
+{% endblock content %}
