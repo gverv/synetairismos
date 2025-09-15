@@ -16,12 +16,18 @@
 {% block content %}
 <h2>Αναφορά Υπόλοιπα</h2>
 {% if report_data %}
+    <p>Επιλέχθηκαν {{ report_data|length }} άτομα για την αναφορά.</p>
+{% comment %} 
+
     <ul>
     {% for person in report_data %}
         <li>{{ person.surname }} {{ person.name }} {{ person.fathersName }}</li>
     {% endfor %}
     </ul>
     <!-- Εδώ βάλε τα υπόλοιπα δεδομένα του report -->
+
+     {% endcomment %}
+    <p>Σύνολο Υπόλοιπο: {{ grand_total_balance|floatformat:2 }}</p>
 {% else %}
     <p>Δεν επιλέχθηκαν άτομα.</p>
 {% endif %}

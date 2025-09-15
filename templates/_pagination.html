@@ -43,5 +43,10 @@
         <span class="page-link">&gt;</span>
       </li>
     {% endif %}
+
+    <!-- Κουμπί All μετά το σύμβολο > -->
+    <li class="page-item ms-2">
+      <a href="?all=1{% if sort_by %}&sort={{ sort_by }}{% endif %}{% if order %}&order={{ order }}{% endif %}" class="btn btn-secondary btn-sm">All</a>
+    </li>
   </ul>
 </nav>

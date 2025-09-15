@@ -78,4 +78,11 @@
 </div>
 
 {% include "_pagination.html" %}
+
+{% comment %} 
+<div class="d-flex justify-content-end mb-3">
+  <a href="?all=1{% if sort_by %}&sort={{ sort_by }}{% endif %}{% if order %}&order={{ order }}{% endif %}" class="btn btn-secondary btn-sm ms-2">All</a>
+</div> 
+{% endcomment %}
+
 {% endblock content %}

@@ -8,7 +8,7 @@ from django.contrib.auth.decorators import permission_required
 from django.views.generic import UpdateView, CreateView
 from django.core.paginator import Paginator
 
-from .models import Counters, Persons, WaterCons, Fields, Paids
+from .models import Counters, Persons, WaterCons, Fields, Paids, Parametroi
 from .forms import WaterConsForm, UserForm, PersonsForm, CountersForm, PaidsForm
 
 def get_sort_params(request, default='-id'):
@@ -38,7 +38,12 @@ def report_view(request):
             'payments': payments,
             'total_balance': total_balance
         })
-    return render(request, 'report.html', {'report_data': report_data})
+    # Υπολογισμός συνολικού υπολοίπου για όλα τα άτομα
+    grand_total_balance = sum(item['total_balance'] for item in report_data)
+    return render(request, 'report.html', {
+        'report_data': report_data,
+        'grand_total_balance': grand_total_balance
+    })
 
 def get_last_final_indication(request, counter_id):
     last_entry = WaterCons.objects.filter(counter_id=counter_id).order_by('-date', '-id').first()
@@ -136,11 +141,17 @@ def paids(request):
     sort_by = request.GET.get('sort', 'receiptNumber')
     order = request.GET.get('order', 'desc')
     sort_field = f'-{sort_by}' if order == 'desc' else sort_by
+    all_param = request.GET.get('all')
     all_data = Paids.objects.all().order_by(sort_field)
-    paginator = Paginator(all_data, 14)  # 14 ανά σελίδα
-    page_number = request.GET.get('page', 1)
-    page_obj = paginator.get_page(page_number)
+    if all_param == '1':
+        # Επιστρέφει όλες τις εγγραφές χωρίς σελιδοποίηση
+        page_obj = all_data
+    else:
+        paginator = Paginator(all_data, 14)  # 14 ανά σελίδα
+        page_number = request.GET.get('page', 1)
+        page_obj = paginator.get_page(page_number)
     return render(request, 'paids.html', {
+        # 'data': all_data,
         'page_obj': page_obj,
         'order': order,
         'sort_by': sort_by
@@ -292,3 +303,10 @@ def select_persons_for_report(request):
             selected = [str(p.id) for p in persons]
         return redirect(f"/report/?persons={','.join(selected)}")
     return render(request, 'select_persons.html', {'persons': persons})
+
+
+def get_param(param_name, default=None):
+    try:
+        return Parametroi.objects.get(param=param_name).value
+    except Parametroi.DoesNotExist:
+        return default

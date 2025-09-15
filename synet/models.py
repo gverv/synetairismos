@@ -131,4 +131,12 @@ class Paids(models.Model):
     def __str__(self):
         return f"{self.receiptNumber} {self.irrigation} {self.paymentDate} {self.paid}".strip()
 
+class Parametroi(models.Model):
+    param = models.CharField(max_length=50, unique=True)
+    description = models.CharField(max_length=200, blank=True)
+    value = models.CharField(max_length=100)
+
+    def __str__(self):
+        return f"{self.param}: {self.value}"
+
 
