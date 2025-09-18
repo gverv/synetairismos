@@ -6,7 +6,9 @@ from django.db.models import Sum, Q
 from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.contrib.auth.decorators import permission_required
 from django.views.generic import UpdateView, CreateView
+from django.views.generic.edit import CreateView
 from django.core.paginator import Paginator
+from django.views.decorators.http import require_GET
 
 from .models import Counters, Persons, WaterCons, Fields, Paids, Parametroi
 from .forms import WaterConsForm, UserForm, PersonsForm, CountersForm, PaidsForm
@@ -198,6 +200,22 @@ class WaterConsCreateView(PermissionRequiredMixin, CreateView):
     template_name = 'add_irrigation.html'
     success_url = reverse_lazy('index')
 
+    def get_form(self, form_class=None):
+        form = super().get_form(form_class)
+        form.fields['customer'].queryset = Persons.objects.filter(isActive=True)
+        return form
+
+    def form_valid(self, form):
+        obj = form.save(commit=False)
+        # Προαιρετικός έλεγχος: οι τιμές να μην είναι αρνητικές
+        if obj.cubicMeters is not None and obj.cubicMeters < 0:
+            form.add_error('cubicMeters', 'Τα κυβικά πρέπει να είναι θετικός αριθμός.')
+            return self.form_invalid(form)
+        if obj.costPerMeter is not None and obj.costPerMeter < 0:
+            form.add_error('costPerMeter', 'Το κόστος ανά κυβικό πρέπει να είναι θετικός αριθμός.')
+            return self.form_invalid(form)
+        return super().form_valid(form)
+
 class WaterConsUpdateView(PermissionRequiredMixin, UpdateView):
     permission_required = 'synet.change_watercons'
     model = WaterCons
@@ -310,3 +328,32 @@ def get_param(param_name, default=None):
         return Parametroi.objects.get(param=param_name).value
     except Parametroi.DoesNotExist:
         return default
+
+@require_GET
+def get_params_for_watercons(request):
+    customer_id = request.GET.get('customer_id')
+    counter_id = request.GET.get('counter_id')
+    params = {}
+
+    # Ανά κυβικό στον Υδρονομέα
+    params['ydronomistFee'] = float(get_param('ydronomistFee', 0) or 0)
+
+    # Βρες αν ο πελάτης είναι μέλος
+    is_member = False
+    if customer_id:
+        try:
+            person = Persons.objects.get(id=customer_id)
+            is_member = person.payAsMember
+        except Persons.DoesNotExist:
+            pass
+    params['isMember'] = is_member
+
+    # Υπολογισμός costPerMeter
+    cost_per_meter = float(get_param('baseCostPerMeter', 0) or 0)
+    if not is_member:
+        cost_per_meter += float(get_param('additionNotMember', 0) or 0)
+    if counter_id and str(counter_id) == "4":
+        cost_per_meter += float(get_param('additionSecondPump', 0) or 0)
+    params['costPerMeter'] = cost_per_meter
+
+    return JsonResponse(params)

@@ -17,13 +17,13 @@ class WaterConsForm(ModelForm):
             'initialIndication', 
             'cubicMeters', 
             'billableCubicMeters', 
-            'hydronomistsCubicMeters', 
+            'ydronomistFee',  # <-- Διόρθωση εδώ
             'costPerMeter',
             'cost', 
             'hydronomistsRight', 
             'viberMsg',
             # 'receipt'
-            ]
+        ]
         labels = {
          'date': 'Ημ/νία',
          'counter': "Μετρητής",
@@ -32,14 +32,14 @@ class WaterConsForm(ModelForm):
          'initialIndication': "Αρχική",
          'cubicMeters': "Κυβικά",
          'billableCubicMeters': "Χρεώσιμα",
-         'hydronomistsCubicMeters': "ΥδρΚυβικά",
+         'ydronomistFee': "Ανά κυβικό στον Υδρονομέα",  # <-- Διόρθωση εδώ
          'costPerMeter': 'ΑνάΚυβικό',
          'cost': "Κόστος",
-         'hydronomistsRight': "ΔικΥδρον",
+         'hydronomistsRight': "Δικαίωμα Υδρονομέα",
          'viberMsg': "Μήνυμα",
-         'notes': "Σημειώσεις",
-         'field': "Χωράφι",
-         'receipt': "Απόδειξη"
+        #  'notes': "Σημειώσεις",
+        #  'field': "Χωράφι",
+        #  'receipt': "Απόδειξη"
         }
         
     def __init__(self, *args, **kwargs):
@@ -110,5 +110,5 @@ class PaidsForm(forms.ModelForm):
             'receiver': 'Εισπράκτορας',
             'receiptNumber': 'ΑρΑπόδειξης',
             'balance': 'Ισοζύγιο',
-        }        
+        }
 

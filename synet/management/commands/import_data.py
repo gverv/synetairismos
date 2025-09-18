@@ -18,7 +18,7 @@ class Command(BaseCommand):
                 # Ανάλογα με τη δομή του CSV σου, αντιστοίχισε τις τιμές στις στήλες του μοντέλου σου
                 try:
                     WaterConsumption.objects.create(
-                            serialNumber=row[0],
+                            # serialNumber=row[0],
                             customer=row[1],
                             date=row[2],
                             collecter=row[3],

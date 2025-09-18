@@ -86,7 +86,7 @@ class Fields(models.Model):
 
 
 class WaterCons(models.Model):
-    serialNumber = models.IntegerField(null=True, blank=True)
+    # serialNumber = models.IntegerField(null=True, blank=True)
     date = models.DateField()
     counter = models.ForeignKey(Counters, on_delete=models.SET_NULL, null=True)
     customer = models.ForeignKey(Persons, on_delete=models.SET_NULL, null=True)
@@ -95,8 +95,9 @@ class WaterCons(models.Model):
     intermediateIndication = models.IntegerField(null=True, blank=True)
     cubicMeters = models.IntegerField(null=True, blank=True)
     billableCubicMeters = models.IntegerField(null=True, blank=True)
-    hydronomistsCubicMeters = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
-    costPerMeter = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True, default=0.30)
+    # hydronomistsCubicMeters = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    ydronomistFee = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True) #, default=0.05)  # Ποσοστό υδρονομέα
+    costPerMeter = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True) #, default=0.30)
     cost = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     hydronomistsRight = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     viberMsg = models.CharField(max_length=200, null=True, blank=True)
@@ -105,14 +106,14 @@ class WaterCons(models.Model):
     receipt = models.ForeignKey("Paids", on_delete=models.SET_NULL, null=True, blank=True, related_name="watercons_receipts") # idΑπόδειξης (paids_id)
     # aReceiptWasIssued = models.BooleanField(default=False)  # Εκδόθηκε απόδειξη
     
-    def save(self, *args, **kwargs):
-        if not self.serialNumber:  # Αν δεν έχει ήδη οριστεί το serialNumber
-            last_entry = WaterCons.objects.order_by('-serialNumber').first()
-            if last_entry:
-                self.serialNumber = last_entry.serialNumber + 1
-            else:
-                self.serialNumber = 1  # Αν δεν υπάρχει προηγούμενη εγγραφή, ξεκινά από το 1
-        super().save(*args, **kwargs)
+    # def save(self, *args, **kwargs):
+    #     if not self.serialNumber:  # Αν δεν έχει ήδη οριστεί το serialNumber
+    #         last_entry = WaterCons.objects.order_by('-serialNumber').first()
+    #         if last_entry:
+    #             self.serialNumber = last_entry.serialNumber + 1
+    #         else:
+    #             self.serialNumber = 1  # Αν δεν υπάρχει προηγούμενη εγγραφή, ξεκινά από το 1
+    #     super().save(*args, **kwargs)
         
     def __str__(self):
         return f"{self.customer} {self.date} {self.billableCubicMeters} {self.cost}".strip()  # Αφαιρεί επιπλέον κενά
@@ -126,6 +127,9 @@ class Paids(models.Model):
     paid = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     paymentDate = models.DateField(null=True, blank=True)
     receiver = models.ForeignKey(Receivers, on_delete=models.SET_NULL, null=True, blank=True)
+    collectorFeeRate = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True) #, default=0.06)  # Ποσοστό εισπράκτορα
+    collectorFee = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    notes = models.TextField(null=True, blank=True)
     balance = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
 
     def __str__(self):
