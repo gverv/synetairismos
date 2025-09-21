@@ -10,23 +10,66 @@
 {% endblock %}
 
 {% block content %}
+
+<style>
+  .btn-copied {
+    background-color: #28a745 !important; /* πράσινο */
+    color: white !important;
+    transition: background-color 0.3s ease;
+  }
+</style>
+
 <div class="container-fluid mt-4">
   <h2 style="font-size:1.3rem;">Προσθήκη Ποτίσματος</h2>
   <form method="post">
     {% csrf_token %}
 
+    <!-- 1. counter -->
     <div class="mb-3">
       {{ form.counter|as_crispy_field }}
     </div>
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        document.getElementById("id_counter").setAttribute("tabindex", "1");
+      });
+    </script>
 
     <div class="row mb-3">
-      <div class="col-12 col-md-4">{{ form.date|as_crispy_field }}</div>  
+      <!-- 2. date -->
+      <div class="col-12 col-md-4">{{ form.date|as_crispy_field }}</div>
+      <script>
+        document.addEventListener("DOMContentLoaded", () => {
+          document.getElementById("id_date").setAttribute("tabindex", "2");
+        });
+      </script>
+
+      <!-- 3. finalIndication -->
       <div class="col-12 col-md-4">{{ form.finalIndication|as_crispy_field }}</div>
+      <script>
+        document.addEventListener("DOMContentLoaded", () => {
+          document.getElementById("id_finalIndication").setAttribute("tabindex", "3");
+        });
+      </script>
+
+      <!-- initialIndication μένει εκτός -->
       <div class="col-12 col-md-4">{{ form.initialIndication|as_crispy_field }}</div>
-    </div>    
-      
-    <div class="mb-3">
-      {{ form.customer|as_crispy_field }}
+    </div>
+
+    <div class="row mb-3">
+      <!-- 4. customer -->
+      <div class="col-12 col-md-8">{{ form.customer|as_crispy_field }}</div>
+      <script>
+        document.addEventListener("DOMContentLoaded", () => {
+          document.getElementById("id_customer").setAttribute("tabindex", "4");
+        });
+      </script>
+
+      <div class="col-12 col-md-4">
+        <div class="form-group mb-0">
+          <label for="id_customer_phone" class="form-label mb-0">Τηλέφωνο</label>
+          <input type="text" id="id_customer_phone" class="form-control" placeholder="Τηλέφωνο" tabindex="-1">
+        </div>
+      </div>
     </div>
 
     <div class="row mb-3">
@@ -45,12 +88,15 @@
       {{ form.viberMsg|as_crispy_field }}
     </div>
 
+    <!-- Κουμπιά με σειρά -->
     <div class="d-flex flex-column flex-md-row gap-2">
-      <button type="submit" class="btn btn-success">Αποθήκευση</button>
-      <button type="button" class="btn btn-info" id="copyMsgClb">Αντιγραφή Μηνύματος</button>
+      <button type="button" class="btn btn-info" id="copyPhoneClb" tabindex="5">Αντιγραφή Τηλεφώνου</button>
+      <button type="button" class="btn btn-info" id="copyMsgClb" tabindex="6">Αντιγραφή Μηνύματος</button>
+      <button type="submit" class="btn btn-success" tabindex="7">Αποθήκευση</button>
     </div>
   </form>
 </div>
+
 <style>
   @media (max-width: 576px) {
     h2 {
@@ -70,7 +116,6 @@
   }
 </style>
 
-
 <script>
 document.addEventListener("DOMContentLoaded", function() {
     let counterSelect = document.getElementById("id_counter");
@@ -85,6 +130,7 @@ document.addEventListener("DOMContentLoaded", function() {
     let customer = document.getElementById("id_customer");
     let date = document.getElementById("id_date");
     let viberMsg = document.getElementById("id_viberMsg");
+    let phoneInput = document.getElementById("id_customer_phone");
 
     function setInitialValues() {
         let customerId = customer.value;
@@ -116,16 +162,16 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     }
 
-    // Αρχικοποίηση cubicMeters και billableCubicMeters
+    // Υπολογισμός κυβικών
     function updateCubicMetersAndBillable() {
         let finalValue = parseFloat(finalIndication.value) || 0;
         let initialValue = parseFloat(initialIndication.value) || 0;
         let difference = finalValue - initialValue;
         cubicMeters.value = difference >= 0 ? difference : "";
-        billableCubicMeters.value = cubicMeters.value; // ΜΟΝΟ αρχικά!
+        billableCubicMeters.value = cubicMeters.value; // default
     }
 
-    // Υπολογισμοί με βάση το billableCubicMeters
+    // Υπολογισμοί κόστους
     function updateValues() {
         let billableValue = parseFloat(billableCubicMeters.value) || 0;
         let costPerMeterValue = parseFloat(costPerMeter.value) || 0;
@@ -137,6 +183,7 @@ document.addEventListener("DOMContentLoaded", function() {
         updateViberMsg();
     }
 
+    // Μήνυμα Viber
     function updateViberMsg() {
         let customerValue = customer.options[customer.selectedIndex]?.text || "";
         let dateRaw = date.value || "";
@@ -154,13 +201,28 @@ document.addEventListener("DOMContentLoaded", function() {
         viberMsg.value = message;
     }
 
-    // Αρχικές τιμές όταν αλλάζει πελάτης ή μετρητής
-    customer.addEventListener("change", setInitialValues);
+    // αλλαγή πελάτη
+    customer.addEventListener("change", function() {
+        setInitialValues();
+        let customerId = customer.value;
+        if (customerId) {
+            fetch(`/get-person-phone/?person_id=${customerId}`)
+                .then(response => response.json())
+                .then(data => {
+                    phoneInput.value = data.phone || "";
+                });
+        } else {
+            phoneInput.value = "";
+        }
+    });
+
+    // αλλαγή μετρητή
     counterSelect.addEventListener("change", function() {
         setInitialValues();
         fetchFinalIndication();
     });
 
+    // αριθμητικά πεδία
     finalIndication.addEventListener("input", function() {
         updateCubicMetersAndBillable();
         updateValues();
@@ -169,10 +231,9 @@ document.addEventListener("DOMContentLoaded", function() {
         updateCubicMetersAndBillable();
         updateValues();
     });
-
     costPerMeter.addEventListener("input", updateValues);
     ydronomistFee.addEventListener("input", updateValues);
-    billableCubicMeters.addEventListener("input", updateValues); // Ο χρήστης μπορεί να το αλλάξει
+    billableCubicMeters.addEventListener("input", updateValues);
     cubicMeters.addEventListener("input", updateValues);
     date.addEventListener("input", updateViberMsg);
 
@@ -181,14 +242,29 @@ document.addEventListener("DOMContentLoaded", function() {
     copyButton.addEventListener("click", function() {
         if (viberMsg.value) {
             navigator.clipboard.writeText(viberMsg.value);
+            copyButton.classList.add("btn-copied");
+            setTimeout(() => copyButton.classList.remove("btn-copied"), 500);
         } else {
             alert("Το πεδίο μηνύματος είναι κενό!");
         }
     });
 
-    // Αρχικοποίηση στην φόρτωση
-    setInitialValues();
+    // Αντιγραφή τηλεφώνου
+    let copyPhoneButton = document.getElementById("copyPhoneClb");
+    copyPhoneButton.addEventListener("click", function() {
+        let customerPhone = phoneInput.value;
+        if (customerPhone) {
+            navigator.clipboard.writeText(customerPhone);
+            copyPhoneButton.classList.add("btn-copied");
+            setTimeout(() => copyPhoneButton.classList.remove("btn-copied"), 500);
+        } else {
+            alert("Το πεδίο τηλεφώνου είναι κενό!");
+        }
+    });
+
+    // focus στην αρχή
+    counterSelect.focus();
 });
 </script>
-            
+
 {% endblock %}

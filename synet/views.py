@@ -357,3 +357,15 @@ def get_params_for_watercons(request):
     params['costPerMeter'] = cost_per_meter
 
     return JsonResponse(params)
+
+
+def get_person_phone(request):
+    person_id = request.GET.get('person_id')
+    phone = ""
+    if person_id:
+        try:
+            person = Persons.objects.get(id=person_id)
+            phone = person.phone or ""
+        except Persons.DoesNotExist:
+            pass
+    return JsonResponse({'phone': phone})

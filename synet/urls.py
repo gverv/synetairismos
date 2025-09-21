@@ -37,5 +37,6 @@ urlpatterns = [
     path('customerIrrigations/<int:customer_id>/', views.customerIrrigations, name="customerIrrigations"),
     path('counter/<int:pk>/', views.counter_detail, name='counter_detail'),
     path('search/', views.global_search, name='global_search'),
+    path('get-person-phone/', views.get_person_phone, name='get_person_phone'),
 ]
 

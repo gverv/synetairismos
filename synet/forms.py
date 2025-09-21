@@ -8,21 +8,20 @@ from django.forms import ModelForm, TextInput, NumberInput, Select
 class WaterConsForm(ModelForm):
     class Meta:
         model = WaterCons
-        # fields = '__all__'
         fields = [
             'date', 
             'counter', 
             'customer', 
+            # 'customer_phone',  # Αφαίρεσέ το αν δεν υπάρχει στο μοντέλο
             'finalIndication', 
             'initialIndication', 
             'cubicMeters', 
             'billableCubicMeters', 
-            'ydronomistFee',  # <-- Διόρθωση εδώ
+            'ydronomistFee',
             'costPerMeter',
             'cost', 
             'hydronomistsRight', 
             'viberMsg',
-            # 'receipt'
         ]
         labels = {
          'date': 'Ημ/νία',
