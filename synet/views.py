@@ -1,26 +1,448 @@
+# views.py
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
-from django.urls import reverse_lazy, reverse
+from django.urls import reverse_lazy
 from django.http import JsonResponse
 from django.db.models import Sum, Q
 from django.contrib.auth.mixins import PermissionRequiredMixin
-from django.contrib.auth.decorators import permission_required
-from django.views.generic import UpdateView, CreateView
-from django.views.generic.edit import CreateView
+from django.contrib.auth.decorators import login_required, permission_required
+from django.views.generic import UpdateView, CreateView, ListView
 from django.core.paginator import Paginator
 from django.views.decorators.http import require_GET
 
-from .models import Counters, Persons, WaterCons, Fields, Paids, Parametroi
-from .forms import WaterConsForm, UserForm, PersonsForm, CountersForm, PaidsForm
+from .models import Counters, Persons, WaterCons, Paids, Parametroi, Fields
+from .forms import WaterConsForm, PersonsForm, CountersForm, PaidsForm
+from .utils import send_sms
+
 
 def get_sort_params(request, default='-id'):
     sort_by = request.GET.get('sort', default)
-    order = request.GET.get('order', 'asc')
+    order = request.GET.get('order', 'asc')  # ή 'desc' αν θέλεις default φθίνουσα
     if order == 'desc' and not sort_by.startswith('-'):
         sort_by = f'-{sort_by}'
     elif order == 'asc' and sort_by.startswith('-'):
         sort_by = sort_by[1:]
     return sort_by, 'asc' if order == 'desc' else 'desc'
+
+
+# ---------------------------
+# INDEX
+# ---------------------------
+def index(request):
+    sort_by, order = get_sort_params(request, default='-id')  # default φθίνουσα id
+    all_mode = request.GET.get('all') == '1'
+    # queryset = WaterCons.objects.all().order_by(sort_by)
+    queryset = WaterCons.objects.all().order_by('-id')  # Πάντα φθίνουσα id
+
+    aggregates = WaterCons.objects.aggregate(
+        total_cost=Sum('cost'),
+        total_hydronomists=Sum('hydronomistsRight'),
+        total_cubic=Sum('cubicMeters'),
+        total_billable=Sum('billableCubicMeters')
+    )
+    total_paid = Paids.objects.aggregate(total_paid=Sum('paid'))['total_paid'] or 0
+    debt = (aggregates['total_cost'] or 0) - total_paid
+
+    if all_mode:
+        page_obj = None
+        objects = queryset  # Όλες οι εγγραφές με φθίνουσα id
+    else:
+        paginator = Paginator(queryset, 20)
+        page_number = request.GET.get('page')
+        page_obj = paginator.get_page(page_number)
+        objects = page_obj.object_list
+
+    return render(request, 'index.html', {
+        'objects': objects,
+        'page_obj': page_obj,
+        'order': order,
+        'sort_by': sort_by,
+        **aggregates,
+        'total_paid': total_paid,
+        'debt': debt,
+    })
+
+
+# ---------------------------
+# CUSTOMERS
+# ---------------------------
+def customers(request):
+    sort_by, order = get_sort_params(request, default='surname')
+    data = Persons.objects.filter(isActive=True).order_by(sort_by)
+    return render(request, 'customers.html', {'data': data, 'order': order})
+
+
+class PersonsUpdateView(PermissionRequiredMixin, UpdateView):
+    permission_required = 'synet.change_model'
+    model = Persons
+    form_class = PersonsForm
+    template_name = 'persons_update.html'
+    success_url = reverse_lazy('customers')
+
+
+# ---------------------------
+# COUNTERS
+# ---------------------------
+def counters(request):
+    sort_by, order = get_sort_params(request, default='collecter')
+    data = Counters.objects.all().order_by(sort_by)
+    return render(request, 'counters.html', {'data': data, 'order': order})
+
+
+class CountersUpdateView(PermissionRequiredMixin, UpdateView):
+    permission_required = 'synet.change_model'
+    model = Counters
+    form_class = CountersForm
+    template_name = 'counters_update.html'
+    success_url = reverse_lazy('counters')
+
+
+# ---------------------------
+# PAIDS
+# ---------------------------
+def paids(request):
+    sort_by = request.GET.get('sort', 'receiptNumber')
+    order = request.GET.get('order', 'desc')
+    sort_field = f'-{sort_by}' if order == 'desc' else sort_by
+    all_param = request.GET.get('all')
+    all_data = Paids.objects.all().order_by(sort_field)
+
+    if all_param == '1':
+        page_obj = all_data
+    else:
+        paginator = Paginator(all_data, 14)
+        page_number = request.GET.get('page', 1)
+        page_obj = paginator.get_page(page_number)
+
+    return render(request, 'paids.html', {
+        'page_obj': page_obj,
+        'order': order,
+        'sort_by': sort_by
+    })
+
+
+# class PaidsUpdateView(PermissionRequiredMixin, UpdateView):
+#     permission_required = 'synet.change_model'
+#     model = Paids
+#     form_class = PaidsForm
+#     # template_name = 'paids_update.html'
+#     template_name = 'paid_create_update.html'
+#     success_url = reverse_lazy('paids')
+
+#     def form_valid(self, form):
+#         obj = form.save(commit=False)
+#         # Αν το irrigation είναι ήδη ορισμένο στο instance, κράτησέ το
+#         if not obj.irrigation:
+#             obj.irrigation = self.get_object().irrigation
+#         # Αν το customer είναι ήδη ορισμένο στο instance, κράτησέ το
+#         if not obj.customer:
+#             obj.customer = self.get_object().customer
+#         obj.save()
+#         return super().form_valid(form)
+
+# # ---------------------------
+# # CREATE PAYMENT
+# # ---------------------------
+# def create_payment(request, pk):
+#     watercons = get_object_or_404(WaterCons, pk=pk)
+#     last_paid = Paids.objects.order_by("-receiptNumber").first()
+#     next_receipt_no = (last_paid.receiptNumber + 1) if last_paid else 1
+
+#     if request.method == "POST":
+#         form = PaidsForm(request.POST, watercons=watercons)
+#         if form.is_valid():
+#             paid = form.save(commit=False)
+#             paid.customer = watercons.customer
+#             paid.irrigation = watercons
+#             paid.save()
+#             return redirect("index")
+#     else:
+#         form = PaidsForm(
+#             initial={
+#                 "receiptNumber": next_receipt_no,
+#                 "cost": watercons.cost,
+#                 "paid": 0,
+#                 "balance": -watercons.cost,
+#             },
+#             watercons=watercons
+#         )
+#         # self.fields["cubicMeters"].initial = watercons.cubicMeters
+
+#     return render(request, "create_payment.html", {"form": form, "watercons": watercons})
+
+# # ---------------------------
+# # UPDATE PAYMENT
+# # ---------------------------
+# class PaidsUpdateView(PermissionRequiredMixin, UpdateView):
+#     permission_required = 'synet.change_model'
+#     model = Paids
+#     form_class = PaidsForm
+#     template_name = 'paid_create_update.html'
+#     success_url = reverse_lazy('index')
+
+#     def form_valid(self, form):
+#         obj = form.save(commit=False)
+#         if not obj.irrigation:
+#             obj.irrigation = self.get_object().irrigation
+#         if not obj.customer:
+#             obj.customer = self.get_object().customer
+#         obj.save()
+#         return super().form_valid(form)
+
+
+# # ---------------------------
+# # CREATE PAYMENT
+# # ---------------------------
+# def create_payment(request, pk):
+#     watercons = get_object_or_404(WaterCons, pk=pk)
+#     last_paid = Paids.objects.order_by("-receiptNumber").first()
+#     next_receipt_no = (last_paid.receiptNumber + 1) if last_paid else 1
+
+#     if request.method == "POST":
+#         form = PaidsForm(request.POST)
+#         if form.is_valid():
+#             paid = form.save(commit=False)
+#             paid.customer = watercons.customer
+#             paid.irrigation = watercons
+#             paid.save()
+#             return redirect("index")
+#     else:
+#         form = PaidsForm(initial={
+#             "receiptNumber": next_receipt_no,
+#             "cost": watercons.cost,
+#             "paid": 0,
+#             "balance": -watercons.cost,
+#             "notes": "",
+#         })
+
+#     return render(request, "paid_create_update.html", {
+#         "form": form,
+#         "watercons": watercons
+#     })
+
+
+# ---------------------------
+# UPDATE PAYMENT
+# ---------------------------
+class PaidsUpdateView(PermissionRequiredMixin, UpdateView):
+    permission_required = 'synet.change_model'
+    model = Paids
+    form_class = PaidsForm
+    template_name = 'paid_create_update.html'
+    success_url = reverse_lazy('paids')
+
+    def form_valid(self, form):
+        obj = form.save(commit=False)
+        if not obj.irrigation:
+            obj.irrigation = self.get_object().irrigation
+        if not obj.customer:
+            obj.customer = self.get_object().customer
+        obj.save()
+
+        messages.success(self.request, f"💾 Η απόδειξη #{obj.receiptNumber} ενημερώθηκε επιτυχώς.")
+        return super().form_valid(form)
+
+
+# ---------------------------
+# CREATE PAYMENT
+# ---------------------------
+def create_payment(request, pk):
+    watercons = get_object_or_404(WaterCons, pk=pk)
+    last_paid = Paids.objects.order_by("-receiptNumber").first()
+    next_receipt_no = (last_paid.receiptNumber + 1) if last_paid else 1
+
+    if request.method == "POST":
+        form = PaidsForm(request.POST)
+        if form.is_valid():
+            paid = form.save(commit=False)
+            paid.customer = watercons.customer
+            paid.irrigation = watercons
+            paid.save()
+            messages.success(request, f"✅ Δημιουργήθηκε επιτυχώς η απόδειξη #{paid.receiptNumber}.")
+            return redirect("paids")
+    else:
+        form = PaidsForm(initial={
+            "receiptNumber": next_receipt_no,
+            "cost": watercons.cost,
+            "paid": 0,
+            "balance": -watercons.cost,
+            "irrigation": watercons,
+            "customer": watercons.customer,
+        })
+
+    return render(request, "paid_create_update.html", {"form": form})
+
+
+# ---------------------------
+# WATERCONSUMPTIONS / IRRIGATIONS
+# ---------------------------
+class WaterConsCreateView(PermissionRequiredMixin, CreateView):
+    permission_required = 'synet.add_watercons'
+    model = WaterCons
+    form_class = WaterConsForm
+    template_name = 'add_irrigation.html'
+    success_url = reverse_lazy('index')
+
+    def get_form(self, form_class=None):
+        form = super().get_form(form_class)
+        form.fields['customer'].queryset = Persons.objects.filter(isActive=True)
+        return form
+
+    def form_valid(self, form):
+        obj = form.save(commit=False)
+        if obj.cubicMeters is not None and obj.cubicMeters < 0:
+            form.add_error('cubicMeters', 'Τα κυβικά πρέπει να είναι θετικός αριθμός.')
+            return self.form_invalid(form)
+        if obj.costPerMeter is not None and obj.costPerMeter < 0:
+            form.add_error('costPerMeter', 'Το κόστος ανά κυβικό πρέπει να είναι θετικός αριθμός.')
+            return self.form_invalid(form)
+        obj.save()
+
+        # SMS
+        if obj.customer and obj.msg:
+            phone = getattr(obj.customer, 'phone', None)
+            if phone:
+                try:
+                    sms_result = send_sms(phone, obj.msg)
+                    messages.success(self.request, f"SMS στάλθηκε: {sms_result}")
+                except Exception as e:
+                    messages.error(self.request, f"Σφάλμα κατά την αποστολή SMS: {e}")
+            else:
+                messages.warning(self.request, "Δεν βρέθηκε τηλεφωνικό για τον πελάτη, SMS δεν στάλθηκε.")
+        return super().form_valid(form)
+
+
+class WaterConsUpdateView(PermissionRequiredMixin, UpdateView):
+    permission_required = 'synet.change_watercons'
+    model = WaterCons
+    form_class = WaterConsForm
+    template_name = 'update_irrigation.html'
+    success_url = reverse_lazy('index')
+
+
+# ---------------------------
+# CUSTOMER IRRIGATIONS (class-based)
+# ---------------------------
+class CustomerIrrigationsView(PermissionRequiredMixin, ListView):
+    permission_required = 'synet.view_watercons'
+    model = WaterCons
+    template_name = 'customerIrrigations.html'
+    context_object_name = 'data'
+    paginate_by = 50
+
+    def get_queryset(self):
+        customer_id = self.kwargs.get('customer_id')
+        return WaterCons.objects.filter(customer_id=customer_id).order_by('-id')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        customer_id = self.kwargs.get('customer_id')
+        customer = get_object_or_404(Persons, id=customer_id)
+        customerPaids = Paids.objects.filter(customer=customer_id).order_by('-receiptNumber')
+        aggregates = WaterCons.objects.filter(customer_id=customer_id).aggregate(
+            total_cost=Sum('cost'),
+            total_cubic=Sum('cubicMeters'),
+            total_billable=Sum('billableCubicMeters')
+        )
+        total_paid = Paids.objects.filter(customer=customer_id).aggregate(total_paid=Sum('paid'))['total_paid'] or 0
+        debt = (aggregates['total_cost'] or 0) - total_paid
+        context.update({
+            'customer': customer,
+            'customerPaids': customerPaids,
+            'order': 'desc',
+            'paids_order': 'desc',
+            **aggregates,
+            'total_paid': total_paid,
+            'debt': debt
+        })
+        return context
+
+
+# ---------------------------
+# AJAX / GET endpoints
+# ---------------------------
+
+@require_GET
+def get_counter_last_reading(request, counter_id):
+    if not counter_id:
+        return JsonResponse({"last_reading": ""})
+    last_entry = (
+        WaterCons.objects.filter(counter_id=counter_id)
+        .order_by("-date", "-id")
+        .first()
+    )
+    if last_entry:
+        return JsonResponse({"last_reading": last_entry.finalIndication})
+    return JsonResponse({"last_reading": ""})
+
+
+@require_GET
+def get_person_phone(request, person_id):
+    phone = ""
+    if person_id:
+        try:
+            person = Persons.objects.get(id=person_id)
+            phone = person.phone or ""
+        except Persons.DoesNotExist:
+            pass
+    return JsonResponse({'phone': phone})
+
+
+@require_GET
+def get_params_for_watercons(request):
+    customer_id = request.GET.get('customer_id')
+    counter_id = request.GET.get('counter_id')
+    params = {}
+
+    params['ydronomistFee'] = float(get_param('ydronomistFee', 0) or 0)
+
+    payAsMember = False
+    if customer_id:
+        try:
+            person = Persons.objects.get(id=customer_id)
+            payAsMember = person.payAsMember
+        except Persons.DoesNotExist:
+            pass
+    params['payAsMember'] = payAsMember
+
+    cost_per_meter = float(get_param('baseCostPerMeter', 0) or 0)
+    if not payAsMember:
+        cost_per_meter += float(get_param('additionNotMember', 0) or 0)
+    if counter_id and str(counter_id) == "4":
+        cost_per_meter += float(get_param('additionSecondPump', 0) or 0)
+    params['costPerMeter'] = cost_per_meter
+
+    return JsonResponse(params)
+
+
+@require_GET
+def get_collector_fee_rate(request):
+    try:
+        rate = Parametroi.objects.get(param="collectorFeeRate").value
+    except Parametroi.DoesNotExist:
+        rate = "0"
+    return JsonResponse({"collectorFeeRate": rate})
+
+
+def get_param(param_name, default=None):
+    try:
+        return Parametroi.objects.get(param=param_name).value
+    except Parametroi.DoesNotExist:
+        return default
+
+
+# ---------------------------
+# REPORT
+# ---------------------------
+def select_persons_for_report(request):
+    persons = Persons.objects.filter(isActive=True)
+    if request.method == 'POST':
+        selected = request.POST.getlist('persons')
+        if 'all' in selected:
+            selected = [str(p.id) for p in persons]
+        return redirect(f"/report/?persons={','.join(selected)}")
+    return render(request, 'select_persons.html', {'persons': persons})
+
 
 def report_view(request):
     person_ids = request.GET.get('persons', '')
@@ -40,232 +462,12 @@ def report_view(request):
             'payments': payments,
             'total_balance': total_balance
         })
-    # Υπολογισμός συνολικού υπολοίπου για όλα τα άτομα
     grand_total_balance = sum(item['total_balance'] for item in report_data)
     return render(request, 'report.html', {
         'report_data': report_data,
         'grand_total_balance': grand_total_balance
     })
 
-def get_last_final_indication(request, counter_id):
-    last_entry = WaterCons.objects.filter(counter_id=counter_id).order_by('-date', '-id').first()
-    return JsonResponse({'finalIndication': getattr(last_entry, 'finalIndication', None)})
-
-def index(request):
-    # Θέλουμε πάντα φθίνουσα ταξινόμηση κατά id (τα τελευταία πρώτα)
-    sort_by, order = get_sort_params(request, default='id')
-    if sort_by == 'id' and order == 'asc':
-        sort_by = '-id'
-    elif sort_by == 'id' and order == 'desc':
-        sort_by = '-id'
-    all_data = WaterCons.objects.all().order_by(sort_by)
-    paginator = Paginator(all_data, 50)  # 50 ανά σελίδα
-    page_number = request.GET.get('page', 1)
-    page_obj = paginator.get_page(page_number)
-
-    aggregates = WaterCons.objects.aggregate(
-        total_cost=Sum('cost'),
-        total_hydronomists=Sum('hydronomistsRight'),
-        total_cubic=Sum('cubicMeters'),
-        total_billable=Sum('billableCubicMeters')
-    )
-    total_paid = Paids.objects.aggregate(total_paid=Sum('paid'))['total_paid'] or 0
-    debt = (aggregates['total_cost'] or 0) - total_paid
-    context = {
-        'page_obj': page_obj,
-        'order': order,
-        **aggregates,
-        'total_paid': total_paid,
-        'debt': debt,
-    }
-    return render(request, 'index.html', context)
-
-def customerIrrigations(request, customer_id):
-    # Dynamic sorting for irrigations (data)
-    data_sort = request.GET.get('sort', 'id')
-    data_order = request.GET.get('order', 'desc')
-    data_sort_by = f'-{data_sort}' if data_order == 'desc' else data_sort
-    data = WaterCons.objects.filter(customer_id=customer_id).order_by(data_sort_by)
-
-    # Dynamic sorting for payments (customerPaids)
-    paids_sort = request.GET.get('paids_sort', 'receiptNumber')
-    paids_order = request.GET.get('paids_order', 'desc')
-    paids_sort_by = f'-{paids_sort}' if paids_order == 'desc' else paids_sort
-    customerPaids = Paids.objects.filter(customer=customer_id).order_by(paids_sort_by)
-    customer = get_object_or_404(Persons, id=customer_id)
-    aggregates = WaterCons.objects.filter(customer_id=customer_id).aggregate(
-        total_cost=Sum('cost'),
-        total_cubic=Sum('cubicMeters'),
-        total_billable=Sum('billableCubicMeters')
-    )
-    total_paid = Paids.objects.filter(customer=customer_id).aggregate(total_paid=Sum('paid'))['total_paid'] or 0
-    debt = (aggregates['total_cost'] or 0) - total_paid
-    context = {
-        'data': data,
-        'order': data_order,
-        'customer': customer,
-        **aggregates,
-        'customerPaids': customerPaids,
-        'total_paid': total_paid,
-        'debt': debt,
-        'paids_order': paids_order,
-    }
-    return render(request, 'customerIrrigations.html', context)
-
-def about(request):
-    return render(request, 'about.html')
-
-def customers(request):
-    sort_by, order = get_sort_params(request, default='surname')
-    data = Persons.customers().order_by(sort_by)
-    return render(request, 'customers.html', {'data': data, 'order': order})
-
-class PersonsUpdateView(PermissionRequiredMixin, UpdateView):
-    permission_required = 'synet.change_model'
-    model = Persons
-    form_class = PersonsForm
-    template_name = 'persons_update.html'
-    success_url = reverse_lazy('customers')
-
-def counters(request):
-    sort_by, order = get_sort_params(request, default='collecter')
-    data = Counters.objects.all().order_by(sort_by)
-    return render(request, 'counters.html', {'data': data, 'order': order})
-
-class CountersUpdateView(PermissionRequiredMixin, UpdateView):
-    permission_required = 'synet.change_model'
-    model = Counters
-    form_class = CountersForm
-    template_name = 'counters_update.html'
-    success_url = reverse_lazy('counters')
-
-def paids(request):
-    sort_by = request.GET.get('sort', 'receiptNumber')
-    order = request.GET.get('order', 'desc')
-    sort_field = f'-{sort_by}' if order == 'desc' else sort_by
-    all_param = request.GET.get('all')
-    all_data = Paids.objects.all().order_by(sort_field)
-    if all_param == '1':
-        # Επιστρέφει όλες τις εγγραφές χωρίς σελιδοποίηση
-        page_obj = all_data
-    else:
-        paginator = Paginator(all_data, 14)  # 14 ανά σελίδα
-        page_number = request.GET.get('page', 1)
-        page_obj = paginator.get_page(page_number)
-    return render(request, 'paids.html', {
-        # 'data': all_data,
-        'page_obj': page_obj,
-        'order': order,
-        'sort_by': sort_by
-    })
-
-class PaidsUpdateView(PermissionRequiredMixin, UpdateView):
-    permission_required = 'synet.change_model'
-    model = Paids
-    form_class = PaidsForm
-    template_name = 'paids_update.html'
-    success_url = reverse_lazy('paids')
-
-@permission_required('synet.change_model', raise_exception=True)
-def paids_update(request, id):
-    paid = get_object_or_404(Paids, id=id)
-    # Πάρε τα query params για να τα χρησιμοποιήσεις στο redirect
-    page = request.GET.get('page', '')
-    sort = request.GET.get('sort', '')
-    order = request.GET.get('order', '')
-    query_string = ''
-    if page or sort or order:
-        params = []
-        if page:
-            params.append(f'page={page}')
-        if sort:
-            params.append(f'sort={sort}')
-        if order:
-            params.append(f'order={order}')
-        query_string = '?' + '&'.join(params)
-
-    if request.method == "POST":
-        form = PaidsForm(request.POST, instance=paid)
-        if form.is_valid():
-            form.save()
-            return redirect('/paids/' + query_string)
-    else:
-        form = PaidsForm(instance=paid)
-    return render(request, 'paids_update.html', {'form': form})
-
-class WaterConsCreateView(PermissionRequiredMixin, CreateView):
-    permission_required = 'synet.add_watercons'
-    model = WaterCons
-    form_class = WaterConsForm
-    template_name = 'add_irrigation.html'
-    success_url = reverse_lazy('index')
-
-    def get_form(self, form_class=None):
-        form = super().get_form(form_class)
-        form.fields['customer'].queryset = Persons.objects.filter(isActive=True)
-        return form
-
-    def form_valid(self, form):
-        obj = form.save(commit=False)
-        # Προαιρετικός έλεγχος: οι τιμές να μην είναι αρνητικές
-        if obj.cubicMeters is not None and obj.cubicMeters < 0:
-            form.add_error('cubicMeters', 'Τα κυβικά πρέπει να είναι θετικός αριθμός.')
-            return self.form_invalid(form)
-        if obj.costPerMeter is not None and obj.costPerMeter < 0:
-            form.add_error('costPerMeter', 'Το κόστος ανά κυβικό πρέπει να είναι θετικός αριθμός.')
-            return self.form_invalid(form)
-        return super().form_valid(form)
-
-class WaterConsUpdateView(PermissionRequiredMixin, UpdateView):
-    permission_required = 'synet.change_watercons'
-    model = WaterCons
-    form_class = WaterConsForm
-    template_name = 'update_irrigation.html'
-    success_url = reverse_lazy('index')
-
-def addPayFromIrrigation(request, irrigation_id):
-    irrigation = get_object_or_404(WaterCons, id=irrigation_id)
-    return render(request, 'addPayFromIrrigation.html', {'irrigation': irrigation})
-
-@permission_required('synet.change_paids', raise_exception=True)
-def create_payment(request, irrigation_id):
-    irrigation = get_object_or_404(WaterCons, id=irrigation_id)
-    last_receipt = Paids.objects.order_by('-receiptNumber').first()
-    next_receipt_number = (last_receipt.receiptNumber + 1) if last_receipt else 1
-
-    if request.method == 'POST':
-        form = PaidsForm(request.POST)
-        if form.is_valid():
-            payment = form.save(commit=False)
-            payment.irrigation = irrigation
-            payment.customer = irrigation.customer
-            payment.cost = irrigation.cost
-            payment.paid = form.cleaned_data['paid'] or 0
-            payment.paymentDate = form.cleaned_data['paymentDate']
-            payment.receiver = form.cleaned_data['receiver']
-            payment.receiptNumber = form.cleaned_data['receiptNumber']
-            payment.save()
-            irrigation.receipt = payment
-            irrigation.save()
-            return redirect('index')
-    else:
-        form = PaidsForm(initial={
-            'irrigation': irrigation.id,
-            'customer': irrigation.customer,
-            'cost': irrigation.cost,
-            'paid': 0,
-            'paymentDate': None,
-            'receiver': None,
-            'receiptNumber': next_receipt_number,
-            'balance': -irrigation.cost,
-        })
-    return render(request, 'create_payment.html', {'form': form, 'irrigation': irrigation})
-
-@permission_required('synet.change_model', raise_exception=True)
-def update_irrigation(request, irrigation_id):
-    waterCons = get_object_or_404(WaterCons, id=irrigation_id)
-    form = WaterConsForm(instance=waterCons)
-    return render(request, 'update_irrigation.html', {'form': form, 'waterCons': waterCons})
 
 def counter_detail(request, pk):
     counter = get_object_or_404(Counters, pk=pk)
@@ -274,14 +476,17 @@ def counter_detail(request, pk):
         'counter': counter,
         'consumptions': consumptions
     })
-
+    
+    
+    
 def global_search(request):
     query = request.GET.get('q', '').strip()
     results = []
     if query:
+        # Παράδειγμα αναζήτησης σε κάποια μοντέλα
         results += search_model(Persons, ['surname', 'name', 'fathersName', 'afm', 'phone', 'notes'], query, 'Πελάτες')
         results += search_model(Counters, ['collecter', 'counter'], query, 'Μετρητές')
-        results += search_model(WaterCons, ['viberMsg', 'notes'], query, 'Ποτίσματα')
+        results += search_model(WaterCons, ['msg', 'notes'], query, 'Ποτίσματα')
         results += search_model(Paids, ['receiptNumber'], query, 'Αποδείξεις')
         results += search_model(Fields, ['field'], query, 'Χωράφια')
     return render(request, 'search_results.html', {'results': results, 'query': query})
@@ -295,7 +500,12 @@ def search_model(model, fields, query, model_name):
         for field in fields:
             value = getattr(obj, field, '')
             if query.lower() in str(value).lower():
-                url = get_object_url(obj)
+                url = None
+                try:
+                    from django.urls import reverse
+                    url = reverse(f"{obj._meta.model_name}_detail", args=[obj.id])
+                except:
+                    pass
                 found.append({
                     'model': model_name,
                     'field': field,
@@ -306,66 +516,69 @@ def search_model(model, fields, query, model_name):
                 })
     return found
 
-def get_object_url(obj):
-    try:
-        return reverse(f"{obj._meta.model_name}_detail", args=[obj.id])
-    except:
-        return None
 
 
-def select_persons_for_report(request):
-    persons = Persons.objects.filter(isActive=True)
-    if request.method == 'POST':
-        selected = request.POST.getlist('persons')
-        if 'all' in selected:
-            selected = [str(p.id) for p in persons]
-        return redirect(f"/report/?persons={','.join(selected)}")
-    return render(request, 'select_persons.html', {'persons': persons})
 
-
-def get_param(param_name, default=None):
-    try:
-        return Parametroi.objects.get(param=param_name).value
-    except Parametroi.DoesNotExist:
-        return default
-
-@require_GET
-def get_params_for_watercons(request):
+def get_watercons_params(request):
     customer_id = request.GET.get('customer_id')
     counter_id = request.GET.get('counter_id')
-    params = {}
 
-    # Ανά κυβικό στον Υδρονομέα
-    params['ydronomistFee'] = float(get_param('ydronomistFee', 0) or 0)
+    def get_param(name, default=0):
+        try:
+            return float(Parametroi.objects.get(param=name).value)
+        except Parametroi.DoesNotExist:
+            return default
 
-    # Βρες αν ο πελάτης είναι μέλος
-    is_member = False
+    ydronomistFee = get_param('ydronomistFee')
+    baseCostPerMeter = get_param('baseCostPerMeter')
+    additionNotMember = get_param('additionNotMember')
+    additionSecondPump = get_param('additionSecondPump')
+
+    # Έλεγχος αν ο πελάτης πληρώνει ως μέλος
+    pay_as_member = True
     if customer_id:
         try:
             person = Persons.objects.get(id=customer_id)
-            is_member = person.payAsMember
+            pay_as_member = person.payAsMember
         except Persons.DoesNotExist:
-            pass
-    params['isMember'] = is_member
+            pay_as_member = True
 
-    # Υπολογισμός costPerMeter
-    cost_per_meter = float(get_param('baseCostPerMeter', 0) or 0)
-    if not is_member:
-        cost_per_meter += float(get_param('additionNotMember', 0) or 0)
-    if counter_id and str(counter_id) == "4":
-        cost_per_meter += float(get_param('additionSecondPump', 0) or 0)
-    params['costPerMeter'] = cost_per_meter
+    is_second_pump = str(counter_id) == "4" if counter_id else False
 
-    return JsonResponse(params)
+    costPerMeter = baseCostPerMeter
+    if not pay_as_member:
+        costPerMeter += additionNotMember
+    if is_second_pump:
+        costPerMeter += additionSecondPump
+
+    return JsonResponse({
+        'ydronomistFee': ydronomistFee,
+        'costPerMeter': costPerMeter,
+        'payAsMember': pay_as_member,
+    })
 
 
-def get_person_phone(request):
-    person_id = request.GET.get('person_id')
-    phone = ""
-    if person_id:
-        try:
-            person = Persons.objects.get(id=person_id)
-            phone = person.phone or ""
-        except Persons.DoesNotExist:
-            pass
-    return JsonResponse({'phone': phone})
+# ---------------------------
+# MY LIST VIEW
+# ---------------------------
+def my_list_view(request):
+    all_mode = request.GET.get('all') == '1'
+    queryset = WaterCons.objects.all().order_by('...')
+
+    if all_mode:
+        page_obj = None
+        objects = queryset  # Όλες οι εγγραφές
+    else:
+        paginator = Paginator(queryset, 20)
+        page_number = request.GET.get('page')
+        page_obj = paginator.get_page(page_number)
+        objects = page_obj.object_list
+
+    return render(request, 'my_template.html', {
+        'objects': objects,
+        'page_obj': page_obj,
+        # ...άλλα context...
+    })
+
+
+

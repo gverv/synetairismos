@@ -45,11 +45,11 @@
                 <tbody>
                     {% for d in data %}
                   <tr>
-                    <td scope="row"><a href="/counter/{{d.id}}">{{d.id}}</a></td>
+                    <td scope="row"><a href="/counters/{{d.id}}/detail/">{{d.id}}</a></td>
                     <td>{{d.customer}}</td>
                     <td>{{d.collecter}}</td>
                     <td>{{d.counter}}</td>
-                    <td><a type="button" href="/counters/update/{{d.id}}" class="btn btn-warning">Edit</a></td>
+                    <td><a type="button" href="/counters/{{d.id}}/update/" class="btn btn-warning">Edit</a></td>
                     {% comment %} <td><a type="button"  href="/delete/{{d.id}}"  class="btn btn-danger">Delete</a></td> {% endcomment %}
                   </tr>
                   {% endfor %}

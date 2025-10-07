@@ -35,117 +35,108 @@
 
 
 {% block content %}
+
+{% if page_obj %}
+  {% include "_pagination.html" %}
+{% endif %}
+
 <div class="container-fluid mt-4">
   <div class="row">
     <div class="col-12 col-md-8">
-          <h4 class="text-center text-white bg-dark p-3 sticky-top">Ποτισμοί</h4>
-          <h5>
-            Συνολικά κυβικά: {{total_cubic|intcomma}} 
-            Χρεώσιμα: {{total_billable|intcomma}} 
-            Συνολική Αξία: <span class="format-number">{{ total_cost|floatformat:2 }}</span>
-            Υδρονομέας: <span class="format-number">{{ total_hydronomists|floatformat:2 }}</span>
-            Εκκαθαρισμένες πληρωμές: <span class="format-number">{{ total_paid|floatformat:2 }}</span>
-            Εκκαθαρισμένη οφειλή: <span class="format-number">{{ debt|floatformat:2 }}</span>
-          </h5>
+      <h4 class="text-center text-white bg-dark p-3 sticky-top">Ποτισμοί</h4>
+      <h5>
+        Συνολικά κυβικά: {{total_cubic|intcomma}} 
+        Χρεώσιμα: {{total_billable|intcomma}} 
+        Συνολική Αξία: <span class="format-number">{{ total_cost|floatformat:2 }}</span>
+        Υδρονομέας: <span class="format-number">{{ total_hydronomists|floatformat:2 }}</span>
+        Εκκαθαρισμένες πληρωμές: <span class="format-number">{{ total_paid|floatformat:2 }}</span>
+        Εκκαθαρισμένη οφειλή: <span class="format-number">{{ debt|floatformat:2 }}</span>
+      </h5>
 
-          <table class="table">
-              <thead>
-                 <tr>
-                    <th scope="col"><a href="?sort=id&order={{ order }}">Id</a></th>
-                    <th scope="col"><a href="?sort=customer&order={{ order }}">Καταναλωτής</a></th>
-                    <th scope="col"><a href="?sort=date&order={{ order }}">ΗμερομηνίαΠοτ</a></th>
-                    <th scope="col"><a href="?sort=cubicMeters&order={{ order }}">Πραγματικά</a></th>
-                    <th scope="col"><a href="?sort=billableCubicMeters&order={{ order }}">Χρεώσιμα</a></th>
-                    <th scope="col"><a href="?sort=cost&order={{ order }}">Αξία</a></th>
-                    <th scope="col">Edit</th>
-                    <th scope="col">Απόδειξη</th>
-                  </tr>
-                </thead>
-                <tbody>
-                    {% for obj in page_obj %}
-                  {% comment %} <tr class="d-flex align-items-center"> {% endcomment %}
-                  <tr class="align-items-center">
-                    {% comment %} <th scope="row">{{obj.id}}</th> {% endcomment %}
-                    <td>{{obj.id}}</td>
-                    <td>{{obj.customer}}</td>
-                    <td>{{ obj.date|date:"D, d-m-y" }}</td>
-                    <td>{{obj.cubicMeters}}</td>
-                    <td>{{obj.billableCubicMeters}}</td>
-                    <td>{{obj.cost}}</td>
-                    <td><a type="button" href="/update-irrigation/{{obj.id}}" class="btn btn-warning">Edit</a></td>
-                    {% if obj.receipt %}
-                      <td><a href="{% url 'paids_update' obj.receipt.id %}" class="btn btn-primary">Απόδειξη</a></td>
-                    {% else %}
-                      <td><a href="{% url 'create_payment' obj.id %}" class="btn btn-success">Δημιουργία</a></td>
-                    {% endif %}
-                  </tr>
-                  {% endfor %}
-                </tbody>
-              </table>
-        </div>
+      <table class="table">
+        <thead>
+          <tr>
+{% comment %} 
+            <th scope="col"><a href="?sort=id&order={{ order }}">Id</a></th>
+            <th scope="col"><a href="?sort=customer&order={{ order }}">Καταναλωτής</a></th>
+            <th scope="col"><a href="?sort=date&order={{ order }}">ΗμερομηνίαΠοτ</a></th>
+            <th scope="col"><a href="?sort=cubicMeters&order={{ order }}">Πραγματικά</a></th>
+            <th scope="col"><a href="?sort=billableCubicMeters&order={{ order }}">Χρεώσιμα</a></th>
+            <th scope="col"><a href="?sort=cost&order={{ order }}">Αξία</a></th>
+ {% endcomment %}
+            <th scope="col">Id</th>
+            <th scope="col">Καταναλωτής</th>
+            <th scope="col">ΗμερομηνίαΠοτ</th>
+            <th scope="col">Πραγματικά</th>
+            <th scope="col">Χρεώσιμα</th>
+            <th scope="col">Αξία</th>
+            <th scope="col">Edit</th>
+            <th scope="col">Απόδειξη</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% if page_obj %}
+            {% for obj in page_obj %}
+            <tr class="align-items-center">
+              <td>{{ obj.id }}</td>
+              <td>{{ obj.customer }}</td>
+              <td>{{ obj.date|date:"D, d-m-y" }}</td>
+              <td>{{ obj.cubicMeters }}</td>
+              <td>{{ obj.billableCubicMeters }}</td>
+              <td>{{ obj.cost }}</td>
+              <td>
+                <a href="{% url 'update_irrigation' obj.id %}" class="btn btn-warning">Edit</a>
+              </td>
+              <td>
+                {% if obj.paid_irrigations.exists %}
+                  <a href="{% url 'paids_update' obj.paid_irrigations.first.id %}" class="btn btn-primary">Απόδειξη</a>
+                {% else %}
+                  <a href="{% url 'create_payment' obj.id %}" class="btn btn-success">Δημιουργία</a>
+                {% endif %}
+              </td>
+            </tr>
+            {% endfor %}
+          {% else %}
+            {% for obj in objects %}
+            <tr class="align-items-center">
+              <td>{{ obj.id }}</td>
+              <td>{{ obj.customer }}</td>
+              <td>{{ obj.date|date:"D, d-m-y" }}</td>
+              <td>{{ obj.cubicMeters }}</td>
+              <td>{{ obj.billableCubicMeters }}</td>
+              <td>{{ obj.cost }}</td>
+              <td>
+                <a href="{% url 'update_irrigation' obj.id %}" class="btn btn-warning">Edit</a>
+              </td>
+              <td>
+                {% if obj.paid_irrigations.exists %}
+                  <a href="{% url 'paids_update' obj.paid_irrigations.first.id %}" class="btn btn-primary">Απόδειξη</a>
+                {% else %}
+                  <a href="{% url 'create_payment' obj.id %}" class="btn btn-success">Δημιουργία</a>
+                {% endif %}
+              </td>
+            </tr>
+            {% endfor %}
+          {% endif %}
+        </tbody>
+      </table>
     </div>
+  </div>
 </div>
 
 
-<nav aria-label="Σελιδοποίηση">
-  <ul class="pagination justify-content-center">
-    {% if page_obj.has_previous %}
-      <li class="page-item">
-        <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if order %}&order={{ order }}{% endif %}" aria-label="Previous">&lt;</a>
-      </li>
-    {% else %}
-      <li class="page-item disabled">
-        <span class="page-link">&lt;</span>
-      </li>
-    {% endif %}
+{% if page_obj %}
+  {% include "_pagination.html" %}
+{% endif %}
 
-    {% for num in page_obj.paginator.page_range %}
-      {% if num == page_obj.number %}
-        <li class="page-item active" aria-current="page">
-          <span class="page-link">{{ num }}</span>
-        </li>
-      {% elif num <= 2 %}
-        <li class="page-item">
-          <a class="page-link" href="?page={{ num }}{% if order %}&order={{ order }}{% endif %}">{{ num }}</a>
-        </li>
-      {% elif num > page_obj.paginator.num_pages|add:"-2" %}
-        <li class="page-item">
-          <a class="page-link" href="?page={{ num }}{% if order %}&order={{ order }}{% endif %}">{{ num }}</a>
-        </li>
-      {% elif num >= page_obj.number|add:"-2" and num <= page_obj.number|add:"2" %}
-        <li class="page-item">
-          <a class="page-link" href="?page={{ num }}{% if order %}&order={{ order }}{% endif %}">{{ num }}</a>
-        </li>
-      {% elif num == 3 and page_obj.number > 5 %}
-        <li class="page-item disabled"><span class="page-link">...</span></li>
-      {% elif num == page_obj.paginator.num_pages|add:"-2" and page_obj.number < page_obj.paginator.num_pages|add:"-4" %}
-        <li class="page-item disabled"><span class="page-link">...</span></li>
-      {% endif %}
-    {% endfor %}
-
-    {% if page_obj.has_next %}
-      <li class="page-item">
-        <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if order %}&order={{ order }}{% endif %}" aria-label="Next">&gt;</a>
-      </li>
-    {% else %}
-      <li class="page-item disabled">
-        <span class="page-link">&gt;</span>
-      </li>
-    {% endif %}
-  </ul>
-</nav>
-
-
-  <script>
-    document.addEventListener("DOMContentLoaded", function() {
-        let numberElements = document.querySelectorAll(".format-number");
-    
-        numberElements.forEach(element => {
-            let formattedValue = element.innerText.replace(/\B(?=(\d{3})+(?!\d))/g, ".").replace(/(\d+)\.(\d\d)$/, '$1,$2');
-            element.innerText = formattedValue;
-        });
-    });
-    </script>
-
-    
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+      let numberElements = document.querySelectorAll(".format-number");
+  
+      numberElements.forEach(element => {
+          let formattedValue = element.innerText.replace(/\B(?=(\d{3})+(?!\d))/g, ".").replace(/(\d+)\.(\d\d)$/, '$1,$2');
+          element.innerText = formattedValue;
+      });
+  });
+</script>
 {% endblock content %}

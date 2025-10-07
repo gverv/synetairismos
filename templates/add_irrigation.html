@@ -1,5 +1,6 @@
 {% extends "main.html" %}
 {% load crispy_forms_tags %}
+
 {% block breadcrumbs %}
 <nav aria-label="breadcrumb">
   <ol class="breadcrumb">
@@ -17,23 +18,28 @@
     color: white !important;
     transition: background-color 0.3s ease;
   }
+
+  .copied {
+  background-color: #198754 !important; /* Bootstrap green */
+  color: #fff !important;
+  transition: background-color 0.3s;
+}
 </style>
 
 <div class="container-fluid mt-4">
-  <h2 style="font-size:1.3rem;">Προσθήκη Ποτίσματος</h2>
+<h2 style="font-size:1.3rem;">Προσθήκη Ποτίσματος</h2>
   <form method="post">
-    {% csrf_token %}
+      {% csrf_token %}
 
     <!-- 1. counter -->
-    <div class="mb-3">
-      {{ form.counter|as_crispy_field }}
-    </div>
-    <script>
+    <div class="mb-3">{{ form.counter|as_crispy_field }}</div>
+        <script>
       document.addEventListener("DOMContentLoaded", () => {
         document.getElementById("id_counter").setAttribute("tabindex", "1");
       });
     </script>
 
+    <div class="row mb-3">
     <div class="row mb-3">
       <!-- 2. date -->
       <div class="col-12 col-md-4">{{ form.date|as_crispy_field }}</div>
@@ -85,15 +91,19 @@
     </div>
 
     <div class="mb-3">
-      {{ form.viberMsg|as_crispy_field }}
+      {{ form.msg|as_crispy_field }}
     </div>
 
     <!-- Κουμπιά με σειρά -->
     <div class="d-flex flex-column flex-md-row gap-2">
       <button type="button" class="btn btn-info" id="copyPhoneClb" tabindex="5">Αντιγραφή Τηλεφώνου</button>
       <button type="button" class="btn btn-info" id="copyMsgClb" tabindex="6">Αντιγραφή Μηνύματος</button>
-      <button type="submit" class="btn btn-success" tabindex="7">Αποθήκευση</button>
+      <button type="button" class="btn btn-primary" id="sendSmsBtn" tabindex="7">Αποστολή SMS</button>
+      <button type="submit" class="btn btn-success" tabindex="8">Αποθήκευση</button>
     </div>
+
+    <!-- Container για SMS alerts -->
+    <div id="smsAlertContainer" class="mt-2"></div>
   </form>
 </div>
 
@@ -115,156 +125,151 @@
     }
   }
 </style>
-
 <script>
 document.addEventListener("DOMContentLoaded", function() {
-    let counterSelect = document.getElementById("id_counter");
-    let initialIndication = document.getElementById("id_initialIndication");
-    let finalIndication = document.getElementById("id_finalIndication");
-    let cubicMeters = document.getElementById("id_cubicMeters");
-    let billableCubicMeters = document.getElementById("id_billableCubicMeters");
-    let cost = document.getElementById("id_cost");
-    let hydronomistsRight = document.getElementById("id_hydronomistsRight");
-    let costPerMeter = document.getElementById("id_costPerMeter");
-    let ydronomistFee = document.getElementById("id_ydronomistFee");
-    let customer = document.getElementById("id_customer");
-    let date = document.getElementById("id_date");
-    let viberMsg = document.getElementById("id_viberMsg");
-    let phoneInput = document.getElementById("id_customer_phone");
+    // --- Αρχικοποίηση πεδίων ---
+    const customer = document.getElementById("id_customer");
+    const counterSelect = document.getElementById("id_counter");
+    const ydronomistFee = document.getElementById("id_ydronomistFee");
+    const costPerMeter = document.getElementById("id_costPerMeter");
+    const billableCubicMeters = document.getElementById("id_billableCubicMeters");
+    const cubicMeters = document.getElementById("id_cubicMeters");
+    const hydronomistsRight = document.getElementById("id_hydronomistsRight");
+    const finalIndication = document.getElementById("id_finalIndication");
+    const initialIndication = document.getElementById("id_initialIndication");
+    const cost = document.getElementById("id_cost");
+    const customerPhone = document.getElementById("id_customer_phone");
+    const date = document.getElementById("id_date");
+    const msg = document.getElementById("id_msg");
 
-    function setInitialValues() {
-        let customerId = customer.value;
-        let counterId = counterSelect.value;
-        if (customerId && counterId) {
-            fetch(`/get-params-for-watercons/?customer_id=${customerId}&counter_id=${counterId}`)
-                .then(response => response.json())
-                .then(data => {
-                    ydronomistFee.value = data.ydronomistFee;
-                    costPerMeter.value = data.costPerMeter;
-                    updateCubicMetersAndBillable();
-                    updateValues();
-                });
+    // --- Ανάκτηση τηλεφώνου πελάτη ---
+    function fetchCustomerPhone() {
+        const customerId = customer.value;
+        if (!customerId) {
+            customerPhone.value = "";
+            return;
+        }
+        fetch(`/ajax/get_person_phone/${customerId}/`)
+            .then(response => response.json())
+            .then(data => {
+                customerPhone.value = data.phone || "";
+            });
+    }
+
+    // --- Ανάκτηση αρχικής ένδειξης μετρητή ---
+    function fetchInitialIndication() {
+        const counterId = counterSelect.value;
+        if (!counterId) return;
+        fetch(`/ajax/get_counter_last_reading/${counterId}/`)
+            .then(response => response.json())
+            .then(data => {
+                initialIndication.value = data.last_reading || "";
+                updateCubicMeters();
+                updateCalculatedFields();
+            });
+    }
+
+    // --- Ανάκτηση παραμέτρων για ydronomistFee και costPerMeter ---
+    function fetchParamsAndUpdate() {
+        const customerId = customer.value;
+        const counterId = counterSelect.value;
+        if (!customerId || !counterId) return;
+
+        fetch(`/ajax/get_watercons_params/?customer_id=${customerId}&counter_id=${counterId}`)
+            .then(response => response.json())
+            .then(data => {
+                ydronomistFee.value = data.ydronomistFee;
+                costPerMeter.value = data.costPerMeter;
+                updateCalculatedFields();
+            });
+    }
+
+    // --- Υπολογισμός κυβικών και χρεώσιμων κυβικών ---
+    function updateCubicMeters() {
+        const finalValue = parseFloat(finalIndication.value) || 0;
+        const initialValue = parseFloat(initialIndication.value) || 0;
+        const diff = finalValue - initialValue;
+        cubicMeters.value = diff >= 0 ? diff : "";
+        billableCubicMeters.value = cubicMeters.value;
+    }
+
+    // --- Υπολογισμοί κόστους και δικαιώματος υδρονομέα ---
+    function updateCalculatedFields() {
+        const billable = parseFloat(billableCubicMeters.value) || 0;
+        const ydronomistFeeValue = parseFloat(ydronomistFee.value) || 0;
+        const costPerMeterValue = parseFloat(costPerMeter.value) || 0;
+
+        hydronomistsRight.value = (billable * ydronomistFeeValue).toFixed(2);
+        cost.value = (billable * costPerMeterValue).toFixed(2);
+
+        updateMsg();
+    }
+
+    // --- Σύνθεση μηνύματος ---
+    function updateMsg() {
+        const customerText = customer.options[customer.selectedIndex]?.text || "";
+        const dateValue = date.value || "";
+        const finalValue = finalIndication.value || "";
+        const initialValue = initialIndication.value || "";
+        const billable = billableCubicMeters.value || "";
+        const costValue = cost.value || "";
+
+        let message = `${customerText}, ${dateValue}, ${finalValue} - ${initialValue} = ${billable} κυβικά, ${costValue}€`;
+        msg.value = message;
+    }
+
+    // --- Αντιγραφή με γραφικό feedback ---
+    function copyWithFeedback(inputId, btnId, successText) {
+        const input = document.getElementById(inputId);
+        const btn = document.getElementById(btnId);
+        if (input && btn) {
+            navigator.clipboard.writeText(input.value).then(() => {
+                const oldText = btn.textContent;
+                btn.classList.add('copied');
+                btn.textContent = successText;
+                setTimeout(() => {
+                    btn.classList.remove('copied');
+                    btn.textContent = oldText;
+                }, 1200);
+            });
         }
     }
 
-    function fetchFinalIndication() {
-        let counterId = counterSelect.value;
-        if (counterId) {
-            fetch(`/get-final-indication/${counterId}/`)
-                .then(response => response.json())
-                .then(data => {
-                    initialIndication.value = data.finalIndication !== null ? data.finalIndication : "";
-                    updateCubicMetersAndBillable();
-                    updateValues();
-                    updateViberMsg();
-                })
-                .catch(error => console.error("Σφάλμα:", error));
-        }
-    }
-
-    // Υπολογισμός κυβικών
-    function updateCubicMetersAndBillable() {
-        let finalValue = parseFloat(finalIndication.value) || 0;
-        let initialValue = parseFloat(initialIndication.value) || 0;
-        let difference = finalValue - initialValue;
-        cubicMeters.value = difference >= 0 ? difference : "";
-        billableCubicMeters.value = cubicMeters.value; // default
-    }
-
-    // Υπολογισμοί κόστους
-    function updateValues() {
-        let billableValue = parseFloat(billableCubicMeters.value) || 0;
-        let costPerMeterValue = parseFloat(costPerMeter.value) || 0;
-        cost.value = (billableValue * costPerMeterValue).toFixed(2);
-
-        let ydronomistFeeValue = parseFloat(ydronomistFee.value) || 0;
-        hydronomistsRight.value = (billableValue * ydronomistFeeValue).toFixed(2);
-
-        updateViberMsg();
-    }
-
-    // Μήνυμα Viber
-    function updateViberMsg() {
-        let customerValue = customer.options[customer.selectedIndex]?.text || "";
-        let dateRaw = date.value || "";
-        let dateValue = "";
-        if (dateRaw) {
-            const [yyyy, mm, dd] = dateRaw.split("-");
-            dateValue = `${dd}-${mm}-${yyyy}`;
-        }
-        let finalValue = finalIndication.value || "";
-        let initialValue = initialIndication.value || "";
-        let costValue = cost.value || "";
-        let billableCubicMetersValue = billableCubicMeters.value || "";
-
-        let message = `${customerValue}, ${dateValue}, ${finalValue} - ${initialValue} = ${billableCubicMetersValue} κυβικά, ${costValue}€`;
-        viberMsg.value = message;
-    }
-
-    // αλλαγή πελάτη
+    // --- Event listeners ---
     customer.addEventListener("change", function() {
-        setInitialValues();
-        let customerId = customer.value;
-        if (customerId) {
-            fetch(`/get-person-phone/?person_id=${customerId}`)
-                .then(response => response.json())
-                .then(data => {
-                    phoneInput.value = data.phone || "";
-                });
-        } else {
-            phoneInput.value = "";
-        }
+        fetchCustomerPhone();
+        fetchParamsAndUpdate();
     });
-
-    // αλλαγή μετρητή
     counterSelect.addEventListener("change", function() {
-        setInitialValues();
-        fetchFinalIndication();
+        fetchInitialIndication();
+        fetchParamsAndUpdate();
     });
 
-    // αριθμητικά πεδία
     finalIndication.addEventListener("input", function() {
-        updateCubicMetersAndBillable();
-        updateValues();
+        updateCubicMeters();
+        updateCalculatedFields();
     });
     initialIndication.addEventListener("input", function() {
-        updateCubicMetersAndBillable();
-        updateValues();
-    });
-    costPerMeter.addEventListener("input", updateValues);
-    ydronomistFee.addEventListener("input", updateValues);
-    billableCubicMeters.addEventListener("input", updateValues);
-    cubicMeters.addEventListener("input", updateValues);
-    date.addEventListener("input", updateViberMsg);
-
-    // Αντιγραφή μηνύματος
-    let copyButton = document.getElementById("copyMsgClb");
-    copyButton.addEventListener("click", function() {
-        if (viberMsg.value) {
-            navigator.clipboard.writeText(viberMsg.value);
-            copyButton.classList.add("btn-copied");
-            setTimeout(() => copyButton.classList.remove("btn-copied"), 500);
-        } else {
-            alert("Το πεδίο μηνύματος είναι κενό!");
-        }
+        updateCubicMeters();
+        updateCalculatedFields();
     });
 
-    // Αντιγραφή τηλεφώνου
-    let copyPhoneButton = document.getElementById("copyPhoneClb");
-    copyPhoneButton.addEventListener("click", function() {
-        let customerPhone = phoneInput.value;
-        if (customerPhone) {
-            navigator.clipboard.writeText(customerPhone);
-            copyPhoneButton.classList.add("btn-copied");
-            setTimeout(() => copyPhoneButton.classList.remove("btn-copied"), 500);
-        } else {
-            alert("Το πεδίο τηλεφώνου είναι κενό!");
-        }
+    billableCubicMeters.addEventListener("input", updateCalculatedFields);
+    ydronomistFee.addEventListener("input", updateCalculatedFields);
+    costPerMeter.addEventListener("input", updateCalculatedFields);
+    date.addEventListener("input", updateMsg);
+
+    document.getElementById("copyPhoneClb").addEventListener("click", function() {
+        copyWithFeedback("id_customer_phone", "copyPhoneClb", "Το τηλέφωνο αντιγράφηκε!");
+    });
+    document.getElementById("copyMsgClb").addEventListener("click", function() {
+        copyWithFeedback("id_msg", "copyMsgClb", "Το μήνυμα αντιγράφηκε!");
     });
 
-    // focus στην αρχή
-    counterSelect.focus();
+    // --- Αρχικοποίηση στην φόρτωση ---
+    fetchCustomerPhone();
+    fetchInitialIndication();
+    fetchParamsAndUpdate();
 });
 </script>
-
 {% endblock %}

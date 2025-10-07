@@ -34,55 +34,63 @@
 
 
 {% block content %}
-{% comment %} {% include "_pagination.html" %} {% endcomment %}
-
 <div class="container-fluid mt-4">
   <div class="row">
     <div class="col-12 col-md-8">
-            <h4 class="text-center text-white bg-dark p-3">Πληρωμές</h4>
-            <table class="table">
-                <thead>
-                  <tr>
-                    <th scope="col"><a href="?sort=receiptNumber&order={% if sort_by == 'receiptNumber' and order == 'asc' %}desc{% else %}asc{% endif %}">ΑρΑπόδ</a></th>
-                    {% comment %} <th scope="col"><a href="?sort=customer&order={% if sort_by == 'customer' and order == 'asc' %}desc{% else %}asc{% endif %}">Καταναλωτής</a></th> {% endcomment %}
-                    <th scope="col"><a href="?sort=irrigation&order={% if sort_by == 'irrigation' and order == 'asc' %}desc{% else %}asc{% endif %}">Ποτισμός</a></th>
-                    <th scope="col"><a href="?sort=paid&order={% if sort_by == 'paid' and order == 'asc' %}desc{% else %}asc{% endif %}">Πληρωμή</a></th>
-                    <th scope="col"><a href="?sort=paymentDate&order={% if sort_by == 'paymentDate' and order == 'asc' %}desc{% else %}asc{% endif %}">Ημ/νία</a></th>
-                    <th scope="col"><a href="?sort=balance&order={% if sort_by == 'balance' and order == 'asc' %}desc{% else %}asc{% endif %}">Ισοζύγιο</a></th>
-                    <th scope="col">Edit</th>
-                  </tr>
-                </thead>
-                <tbody>
-    {% for d in page_obj %}
-    <tr>
-      <td>{{d.receiptNumber}}</td>
-      <td>{{d.irrigation}}</td>
-      <td>{{d.paid}}</td>
-      <td>{{d.paymentDate}}</td>
-      <td>{{d.balance}}</td>
-      {% if d.balance == 0 %}
-        <td><a type="button" href="/paids/update/{{d.id}}?page={{ page_obj.number }}&sort={{ sort_by }}&order={{ order }}" class="btn btn-primary">Edit</a></td>
-      {% elif d.balance > 0 %}
-        <td><a type="button" href="/paids/update/{{d.id}}?page={{ page_obj.number }}&sort={{ sort_by }}&order={{ order }}" class="btn btn-success">Edit</a></td>
-      {% elif d.balance < 0 %}
-        <td><a type="button" href="/paids/update/{{d.id}}?page={{ page_obj.number }}&sort={{ sort_by }}&order={{ order }}" class="btn btn-danger">Edit</a></td>
-      {% else %}
-        <td><a type="button" href="/paids/update/{{d.id}}?page={{ page_obj.number }}&sort={{ sort_by }}&order={{ order }}" class="btn btn-warning">Edit</a></td>
-      {% endif %}
-    </tr>
-    {% endfor %}
-</tbody>
-</table>
-</div>
-</div>
-</div>
-
-{% include "_pagination.html" %}
-
+      <h4 class="text-center text-white bg-dark p-3">Πληρωμές</h4>
+      {% include "_pagination.html" %}
+      <table class="table">
+        <thead>
+          <tr>
+            <th scope="col"><a href="?sort=receiptNumber&order={% if sort_by == 'receiptNumber' and order == 'asc' %}desc{% else %}asc{% endif %}">ΑρΑπόδ</a></th>
+            <th scope="col"><a href="?sort=irrigation&order={% if sort_by == 'irrigation' and order == 'asc' %}desc{% else %}asc{% endif %}">Ποτισμός</a></th>
+            <th scope="col"><a href="?sort=paid&order={% if sort_by == 'paid' and order == 'asc' %}desc{% else %}asc{% endif %}">Πληρωμή</a></th>
+            <th scope="col"><a href="?sort=paymentDate&order={% if sort_by == 'paymentDate' and order == 'asc' %}desc{% else %}asc{% endif %}">Ημ/νία</a></th>
+            <th scope="col"><a href="?sort=balance&order={% if sort_by == 'balance' and order == 'asc' %}desc{% else %}asc{% endif %}">Ισοζύγιο</a></th>
+            <th scope="col">Edit</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for d in page_obj %}
+          <tr>
+            <td>{{ d.receiptNumber }}</td>
+            <td>{{ d.irrigation }}</td>
+            <td>{{ d.paid }}</td>
+            <td>{{ d.paymentDate }}</td>
+            <td>{{ d.balance }}</td>
+            <td>
 {% comment %} 
-<div class="d-flex justify-content-end mb-3">
-  <a href="?all=1{% if sort_by %}&sort={{ sort_by }}{% endif %}{% if order %}&order={{ order }}{% endif %}" class="btn btn-secondary btn-sm ms-2">All</a>
-</div> 
-{% endcomment %}
+              {% if d.balance == 0 %}
+                <a type="button" href="{% url 'paids_update' d.id %}?page={{ page_obj.number }}&sort={{ sort_by }}&order={{ order }}" class="btn btn-primary">Edit</a>
+              {% elif d.balance > 0 %}
+                <a type="button" href="{% url 'paids_update' d.id %}?page={{ page_obj.number }}&sort={{ sort_by }}&order={{ order }}" class="btn btn-success">Edit</a>
+              {% elif d.balance < 0 %}
+                <a type="button" href="{% url 'paids_update' d.id %}?page={{ page_obj.number }}&sort={{ sort_by }}&order={{ order }}" class="btn btn-danger">Edit</a>
+              {% else %}
+                <a type="button" href="{% url 'paids_update' d.id %}?page={{ page_obj.number }}&sort={{ sort_by }}&order={{ order }}" class="btn btn-warning">Edit</a>
+              {% endif %}
+               {% endcomment %}
+
+               
+              {% if d.balance == 0 %}
+                <a type="button" href="{% url 'paids_update' d.id %}" class="btn btn-primary">Edit</a>
+              {% elif d.balance > 0 %}
+                <a type="button" href="{% url 'paids_update' d.id %}" class="btn btn-success">Edit</a>
+              {% elif d.balance < 0 %}
+                <a type="button" href="{% url 'paids_update' d.id %}" class="btn btn-danger">Edit</a>
+              {% else %}
+                <a type="button" href="{% url 'paids_update' d.id %}" class="btn btn-warning">Edit</a>
+              {% endif %}
+              
+
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% include "_pagination.html" %}
 
 {% endblock content %}

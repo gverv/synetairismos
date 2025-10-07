@@ -60,8 +60,8 @@
                   <tr>
                     <th scope="row">{{ forloop.counter }}</th>
                     <th scope="row">{{d.id}}</th>
-                    <td><a href="/customerIrrigations/{{d.id}}">{{d.surname}} {{d.name}} {{d.fathersName}}</a></td>
-                    <td><a type="button" href="/customers/update/{{d.id}}" class="btn btn-warning">Edit</a></td>
+                    <td><a href="/customers/{{d.id}}/irrigations/">{{d.surname}} {{d.name}} {{d.fathersName}}</a></td>
+                    <td><a type="button" href="/customers/{{d.id}}/update/" class="btn btn-warning">Edit</a></td>
                     {% comment %} <td><a type="button"  href="/delete/{{d.id}}"  class="btn btn-danger">Delete</a></td> {% endcomment %}
                   </tr>
                   {% endfor %}

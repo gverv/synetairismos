@@ -22,6 +22,13 @@
     <div class="row">
         <div class="col-md-8">
             <h4 class="text-center text-white bg-dark p-3">Πληρωμές</h4>
+            <h5>
+              Συνολική Αξία: {{ total_cost|floatformat:2|intcomma }}
+              Συνολικά κυβικά: {{total_cubic|intcomma}} 
+              Χρεώσιμα: {{total_billable|intcomma}} 
+              Πλήρωσε: {{ total_paid|floatformat:2|intcomma }}
+              Οφείλει: {{ debt|floatformat:2|intcomma }}
+            </h5>
             <table class="table">
                 <thead>
                   <tr>
@@ -44,13 +51,13 @@
                       <td>{{d.paymentDate}}</td>
                       <td>{{d.balance}}</td>
                       {% if d.balance == 0 %}
-                        <td><a type="button" href="/paids/update/{{d.id}}" class="btn btn-primary">Edit</a></td>
+                        <td><a type="button" href="/paids/{{d.id}}/update/" class="btn btn-primary">Edit</a></td>
                       {% elif d.balance > 0 %}
-                        <td><a type="button" href="/paids/update/{{d.id}}" class="btn btn-success">Edit</a></td>
+                        <td><a type="button" href="/paids/{{d.id}}/update/" class="btn btn-success">Edit</a></td>
                       {% elif d.balance < 0 %}
-                        <td><a type="button" href="/paids/update/{{d.id}}" class="btn btn-danger">Edit</a></td>
+                        <td><a type="button" href="/paids/{{d.id}}/update/" class="btn btn-danger">Edit</a></td>
                       {% else %}
-                        <td><a type="button" href="/paids/update/{{d.id}}" class="btn btn-warning">Edit</a></td>
+                        <td><a type="button" href="/paids/{{d.id}}/update/" class="btn btn-warning">Edit</a></td>
                       {% endif %}
                     </tr>
                   {% endfor %}

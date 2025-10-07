@@ -1,9 +1,11 @@
+# forms.py
 import datetime
 from datetime import date
 from django import forms
-from synet.models import  Persons, Counters, Paids, Fields, WaterCons, Receivers
 from django.contrib.auth.models import User
 from django.forms import ModelForm, TextInput, NumberInput, Select
+
+from .models import  Persons, Counters, Paids, Fields, WaterCons, Receivers
 
 class WaterConsForm(ModelForm):
     class Meta:
@@ -12,7 +14,6 @@ class WaterConsForm(ModelForm):
             'date', 
             'counter', 
             'customer', 
-            # 'customer_phone',  # Αφαίρεσέ το αν δεν υπάρχει στο μοντέλο
             'finalIndication', 
             'initialIndication', 
             'cubicMeters', 
@@ -21,7 +22,7 @@ class WaterConsForm(ModelForm):
             'costPerMeter',
             'cost', 
             'hydronomistsRight', 
-            'viberMsg',
+            'msg',
         ]
         labels = {
          'date': 'Ημ/νία',
@@ -35,7 +36,7 @@ class WaterConsForm(ModelForm):
          'costPerMeter': 'ΑνάΚυβικό',
          'cost': "Κόστος",
          'hydronomistsRight': "Δικαίωμα Υδρονομέα",
-         'viberMsg': "Μήνυμα",
+         'msg': "Μήνυμα",
         #  'notes': "Σημειώσεις",
         #  'field': "Χωράφι",
         #  'receipt': "Απόδειξη"
@@ -51,18 +52,6 @@ class UserForm(ModelForm):
         fields = ['username', 'email']
 
         
-# class CustomerForm(ModelForm):
-#     class Meta:
-#         model = Customers
-#         fields = '__all__'
-#         widgets = {
-#             'surname': TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter the Customer Name'}),
-#             'name': TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter the Customer Name'}),
-#             'fathersName': TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter the Customer Name'}),
-#             'afm': TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter the Customer Name'}),
-#             'name': TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter the Customer Name'}),
-#         }        
-
 class PersonsForm(forms.ModelForm):
     class Meta:
         model = Persons
@@ -85,8 +74,11 @@ class PersonsForm(forms.ModelForm):
 class CountersForm(forms.ModelForm):
     class Meta:
         model = Counters
-        fields = '__all__'
-        # fields = ['customer', 'collecter', 'counter', 'lastIndication']
+        fields = ['customer', 'collecter', 'counter', 'lastIndication']
+        widgets = {
+            'customer': forms.TextInput(attrs={'readonly': 'readonly'}),
+            # ...άλλα widgets...
+        }
         labels = {
             'customer': 'Καταναλωτης',
             'collecter': 'Κολεκτέρ',
@@ -96,18 +88,98 @@ class CountersForm(forms.ModelForm):
  
 
 
+# class PaidsForm(forms.ModelForm):
+#     class Meta:
+#         model = Paids
+#         fields = [
+#             'receiptNumber',  # Αρ Απόδειξης
+#             'cost',  # Αξία
+#             'paid',  # Πλήρωσε
+#             'balance',  # Ισοζύγιο
+#             'paymentDate',  # Ημ/νία Πληρωμής
+#             'receiver',  # Εισπράκτορας
+#             'collectorFeeRate',  # Ποσοστό Εισπράκτορα
+#             'collectorFee',  # Αμοιβή Εισπράκτορα
+#             'notes',
+#             'irrigation',  # Ποτισμός
+#             'customer',  # Καταναλωτής
+#         ]
+#         # widgets = {
+#         #     'notes': forms.Textarea(attrs={"rows": 2}),
+#         #     'paymentDate': forms.DateInput(attrs={"type": "date"}),
+#         #     'irrigation': forms.TextInput(attrs={'readonly': 'readonly'}),
+#         #     'customer': forms.TextInput(attrs={'readonly': 'readonly'}),
+#         #     'collectorFeeRate': forms.NumberInput(attrs={'step': '0.01'}),
+#         #     'collectorFee': forms.NumberInput(attrs={'step': '0.01'}),
+#         # }
+#         labels = {
+#             'receiptNumber': 'Αρ Απόδειξης',
+#             'cost': 'Αξία',
+#             'paid': 'Πλήρωσε',
+#             'balance': 'Ισοζύγιο',
+#             'paymentDate': 'Ημ/νία Πληρωμής',
+#             'receiver': 'Εισπράκτορας',
+#             'irrigation': 'Ποτισμός',
+#             'customer': 'Καταναλωτής',
+#             'collectorFeeRate': 'Ποσοστό Εισπράκτορα',
+#             'collectorFee': 'Αμοιβή Εισπράκτορα',
+#             'notes': 'Σημειώσεις',
+#         }
+
+#     def __init__(self, *args, **kwargs):
+#         # Πιάσε το watercons από τα kwargs
+#         watercons = kwargs.pop("watercons", None)
+#         super().__init__(*args, **kwargs)
+
+#         if watercons:
+#             self.fields["customer"].initial = str(watercons.customer)
+#             # self.fields["cubicMeters"].initial = watercons.cubicMeters
+#             # self.fields["cost_display"].initial = watercons.cost
+
 class PaidsForm(forms.ModelForm):
     class Meta:
         model = Paids
-        fields = '__all__'
+        fields = [
+            'receiptNumber',  # Αρ Απόδειξης
+            'cost',  # Αξία
+            'paid',  # Πλήρωσε
+            'balance',  # Ισοζύγιο
+            'paymentDate',  # Ημ/νία Πληρωμής
+            'receiver',  # Εισπράκτορας
+            'collectorFeeRate',  # Ποσοστό Εισπράκτορα
+            'collectorFee',  # Αμοιβή Εισπράκτορα
+            'notes',
+            # 'irrigation',  # Ποτισμός
+            # 'customer',  # Καταναλωτής
+        ]
+        widgets = {
+            'notes': forms.Textarea(attrs={'rows': 2}),
+            'paymentDate': forms.DateInput(attrs={'type': 'date'}, format='%Y-%m-%d'),
+            # 'paymentDate': forms.DateInput(attrs={'type': 'date'}),
+            # 'irrigation': forms.TextInput(attrs={'readonly': 'readonly'}),
+            # 'customer': forms.TextInput(attrs={'readonly': 'readonly'}),
+            'collectorFeeRate': forms.NumberInput(attrs={'step': '0.01'}),
+            'collectorFee': forms.NumberInput(attrs={'step': '0.01'}),
+        }
         labels = {
-            'irrigation': 'Ποτισμός',
-            'customer': 'Καταναλωτης',
+            'receiptNumber': 'Αρ Απόδειξης',
             'cost': 'Αξία',
             'paid': 'Πλήρωσε',
-            'paymentDate': 'Ημ/νίαΠληρωμής',
-            'receiver': 'Εισπράκτορας',
-            'receiptNumber': 'ΑρΑπόδειξης',
             'balance': 'Ισοζύγιο',
+            'paymentDate': 'Ημ/νία Πληρωμής',
+            'receiver': 'Εισπράκτορας',
+            'irrigation': 'Ποτισμός',
+            'customer': 'Καταναλωτής',
+            'collectorFeeRate': 'Ποσοστό Εισπράκτορα',
+            'collectorFee': 'Αμοιβή Εισπράκτορα',
+            'notes': 'Σημειώσεις',
         }
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Βάλε default τιμές ή readonly ρυθμίσεις αν χρειάζεται
+        self.fields['paid'].initial = self.fields['paid'].initial or 0
+        self.fields['balance'].initial = self.fields['balance'].initial or 0
+    #     self.fields['paymentDate'].initial = date.today().strftime("%Y-%m-%d")
+        # self.fields['paymentDate'].initial = forms.DateField().widget.attrs['value'] = date.today().strftime("%Y-%m-%d")
+        # self.fields['collectorFeeRate'].initial = self.fields['collectorFeeRate'].initial or

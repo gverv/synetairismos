@@ -36,7 +36,7 @@ class Command(BaseCommand):
                             receivedBy=row[15],
                             receiptNumber=row[16] if row[16] else None,
                             balance=row[17] if row[17] else None,
-                            viberMsg=row[18],
+                            msg=row[18],
                             notes=row[19],
                             fields=row[20],
                             olivesNumber=row[21] if row[21] else None,
