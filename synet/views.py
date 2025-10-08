@@ -10,7 +10,7 @@ from django.views.generic import UpdateView, CreateView, ListView
 from django.core.paginator import Paginator
 from django.views.decorators.http import require_GET
 
-from .models import Counters, Persons, WaterCons, Paids, Parametroi, Fields
+from .models import Counters, Persons, Receivers, WaterCons, Paids, Parametroi, Fields
 from .forms import WaterConsForm, PersonsForm, CountersForm, PaidsForm
 from .utils import send_sms
 
@@ -121,106 +121,6 @@ def paids(request):
     })
 
 
-# class PaidsUpdateView(PermissionRequiredMixin, UpdateView):
-#     permission_required = 'synet.change_model'
-#     model = Paids
-#     form_class = PaidsForm
-#     # template_name = 'paids_update.html'
-#     template_name = 'paid_create_update.html'
-#     success_url = reverse_lazy('paids')
-
-#     def form_valid(self, form):
-#         obj = form.save(commit=False)
-#         # Αν το irrigation είναι ήδη ορισμένο στο instance, κράτησέ το
-#         if not obj.irrigation:
-#             obj.irrigation = self.get_object().irrigation
-#         # Αν το customer είναι ήδη ορισμένο στο instance, κράτησέ το
-#         if not obj.customer:
-#             obj.customer = self.get_object().customer
-#         obj.save()
-#         return super().form_valid(form)
-
-# # ---------------------------
-# # CREATE PAYMENT
-# # ---------------------------
-# def create_payment(request, pk):
-#     watercons = get_object_or_404(WaterCons, pk=pk)
-#     last_paid = Paids.objects.order_by("-receiptNumber").first()
-#     next_receipt_no = (last_paid.receiptNumber + 1) if last_paid else 1
-
-#     if request.method == "POST":
-#         form = PaidsForm(request.POST, watercons=watercons)
-#         if form.is_valid():
-#             paid = form.save(commit=False)
-#             paid.customer = watercons.customer
-#             paid.irrigation = watercons
-#             paid.save()
-#             return redirect("index")
-#     else:
-#         form = PaidsForm(
-#             initial={
-#                 "receiptNumber": next_receipt_no,
-#                 "cost": watercons.cost,
-#                 "paid": 0,
-#                 "balance": -watercons.cost,
-#             },
-#             watercons=watercons
-#         )
-#         # self.fields["cubicMeters"].initial = watercons.cubicMeters
-
-#     return render(request, "create_payment.html", {"form": form, "watercons": watercons})
-
-# # ---------------------------
-# # UPDATE PAYMENT
-# # ---------------------------
-# class PaidsUpdateView(PermissionRequiredMixin, UpdateView):
-#     permission_required = 'synet.change_model'
-#     model = Paids
-#     form_class = PaidsForm
-#     template_name = 'paid_create_update.html'
-#     success_url = reverse_lazy('index')
-
-#     def form_valid(self, form):
-#         obj = form.save(commit=False)
-#         if not obj.irrigation:
-#             obj.irrigation = self.get_object().irrigation
-#         if not obj.customer:
-#             obj.customer = self.get_object().customer
-#         obj.save()
-#         return super().form_valid(form)
-
-
-# # ---------------------------
-# # CREATE PAYMENT
-# # ---------------------------
-# def create_payment(request, pk):
-#     watercons = get_object_or_404(WaterCons, pk=pk)
-#     last_paid = Paids.objects.order_by("-receiptNumber").first()
-#     next_receipt_no = (last_paid.receiptNumber + 1) if last_paid else 1
-
-#     if request.method == "POST":
-#         form = PaidsForm(request.POST)
-#         if form.is_valid():
-#             paid = form.save(commit=False)
-#             paid.customer = watercons.customer
-#             paid.irrigation = watercons
-#             paid.save()
-#             return redirect("index")
-#     else:
-#         form = PaidsForm(initial={
-#             "receiptNumber": next_receipt_no,
-#             "cost": watercons.cost,
-#             "paid": 0,
-#             "balance": -watercons.cost,
-#             "notes": "",
-#         })
-
-#     return render(request, "paid_create_update.html", {
-#         "form": form,
-#         "watercons": watercons
-#     })
-
-
 # ---------------------------
 # UPDATE PAYMENT
 # ---------------------------
@@ -246,10 +146,18 @@ class PaidsUpdateView(PermissionRequiredMixin, UpdateView):
 # ---------------------------
 # CREATE PAYMENT
 # ---------------------------
+from .models import Parametroi
+
 def create_payment(request, pk):
     watercons = get_object_or_404(WaterCons, pk=pk)
     last_paid = Paids.objects.order_by("-receiptNumber").first()
     next_receipt_no = (last_paid.receiptNumber + 1) if last_paid else 1
+
+    # --- ΝΕΟ: Ανάκτηση collectorFeeRate από τη βάση
+    try:
+        collector_rate = float(Parametroi.objects.get(param="collectorFeeRate").value)
+    except (Parametroi.DoesNotExist, ValueError):
+        collector_rate = 0.06  # προεπιλεγμένη τιμή
 
     if request.method == "POST":
         form = PaidsForm(request.POST)
@@ -268,9 +176,13 @@ def create_payment(request, pk):
             "balance": -watercons.cost,
             "irrigation": watercons,
             "customer": watercons.customer,
+            "collectorFeeRate": collector_rate,
         })
 
-    return render(request, "paid_create_update.html", {"form": form})
+    return render(request, "paid_create_update.html", {
+        "form": form,
+        "collectorFeeRate": collector_rate,  # περνάμε το rate στο template
+    })
 
 
 # ---------------------------
@@ -415,13 +327,39 @@ def get_params_for_watercons(request):
     return JsonResponse(params)
 
 
-@require_GET
+
 def get_collector_fee_rate(request):
+    """
+    Επιστρέφει το ποσοστό εισπράκτορα (collectorFeeRate) από τον πίνακα parametroi
+    για δυναμική χρήση στο React ή Ajax.
+    """
     try:
-        rate = Parametroi.objects.get(param="collectorFeeRate").value
-    except Parametroi.DoesNotExist:
-        rate = "0"
+        rate_obj = Parametroi.objects.get(param="collectorFeeRate")
+        value = rate_obj.value.strip()
+        # Αν η τιμή έχει %, αφαίρεσέ το
+        if value.endswith("%"):
+            value = value.replace("%", "")
+        rate = float(value) / 100
+    except (Parametroi.DoesNotExist, ValueError):
+        rate = 0.03  # default αν λείπει
+
     return JsonResponse({"collectorFeeRate": rate})
+
+
+# @require_GET
+# def get_collector_fee_rate(request):
+#     """
+#     Επιστρέφει το ποσοστό εισπράκτορα (collectorFeeRate) από τον πίνακα parametroi
+#     ώστε να μπορεί να χρησιμοποιηθεί δυναμικά από React ή Ajax.
+#     """
+#     try:
+#         rate_obj = Parametroi.objects.get(param="collectorFeeRate")
+#         rate = float(rate_obj.value)
+#     except (Parametroi.DoesNotExist, ValueError):
+#         rate = 0.06  # default αν λείπει
+
+#     return JsonResponse({"collectorFeeRate": rate})
+
 
 
 def get_param(param_name, default=None):
@@ -581,4 +519,21 @@ def my_list_view(request):
     })
 
 
+
+
+
+
+@require_GET
+def receivers_list(request):
+    """
+    Επιστρέφει λίστα εισπρακτόρων για dropdown στο React.
+    Παράδειγμα JSON:
+    [
+        {"id": 1, "name": "Γεώργιος Παπαδόπουλος"},
+        {"id": 2, "name": "Δημήτρης Νικολάου"}
+    ]
+    """
+    receivers = Receivers.objects.all().order_by("receiver")
+    data = [{"id": r.id, "name": r.receiver} for r in receivers]
+    return JsonResponse(data, safe=False)
 

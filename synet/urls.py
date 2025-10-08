@@ -3,7 +3,8 @@ from django.urls import path
 from django.contrib.auth import views as auth_views
 from django.contrib.auth.views import LoginView
 from django.contrib.auth.decorators import login_required
-from . import views
+from . import views, views_param
+
 
 urlpatterns = [
     # INDEX
@@ -30,6 +31,8 @@ urlpatterns = [
     path('paids/', login_required(views.paids), name='paids'),
     path('paids/<int:pk>/update/', login_required(views.PaidsUpdateView.as_view()), name='paids_update'),
     path('paids/add/<int:pk>/', login_required(views.create_payment), name='create_payment'),
+    # path("api/collector-fee-rate/", views_param.get_collector_fee_rate, name="collector_fee_rate"),
+    path("api/collector-fee-rate/", views.get_collector_fee_rate, name="collector_fee_rate"),
 
     # IRRIGATIONS / WATERCONSUMPTIONS
     path('irrigations/add/', login_required(views.WaterConsCreateView.as_view()), name='add_irrigation'),
@@ -41,6 +44,7 @@ urlpatterns = [
     path('ajax/get_counter_last_reading/<int:counter_id>/', login_required(views.get_counter_last_reading), name='get_counter_last_reading'),
     path('ajax/get_watercons_params/', login_required(views.get_watercons_params), name='get_watercons_params'),
     path('ajax/get_collector_fee_rate/', login_required(views.get_collector_fee_rate), name='get_collector_fee_rate'),
+    path("api/receivers/", views.receivers_list, name="receivers_list"),
 
     # REPORT
     path('report/select-persons/', login_required(views.select_persons_for_report), name='select_persons_for_report'),
