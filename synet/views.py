@@ -1,4 +1,4 @@
-# views.py
+# synet\views.py
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.urls import reverse_lazy
@@ -120,56 +120,6 @@ def paids(request):
         'sort_by': sort_by
     })
 
-
-# class PaidsUpdateView(PermissionRequiredMixin, UpdateView):
-#     permission_required = 'synet.change_model'
-#     model = Paids
-#     form_class = PaidsForm
-#     # template_name = 'paids_update.html'
-#     template_name = 'paid_create_update.html'
-#     success_url = reverse_lazy('paids')
-
-#     def form_valid(self, form):
-#         obj = form.save(commit=False)
-#         # Αν το irrigation είναι ήδη ορισμένο στο instance, κράτησέ το
-#         if not obj.irrigation:
-#             obj.irrigation = self.get_object().irrigation
-#         # Αν το customer είναι ήδη ορισμένο στο instance, κράτησέ το
-#         if not obj.customer:
-#             obj.customer = self.get_object().customer
-#         obj.save()
-#         return super().form_valid(form)
-
-# # ---------------------------
-# # CREATE PAYMENT
-# # ---------------------------
-# def create_payment(request, pk):
-#     watercons = get_object_or_404(WaterCons, pk=pk)
-#     last_paid = Paids.objects.order_by("-receiptNumber").first()
-#     next_receipt_no = (last_paid.receiptNumber + 1) if last_paid else 1
-
-#     if request.method == "POST":
-#         form = PaidsForm(request.POST, watercons=watercons)
-#         if form.is_valid():
-#             paid = form.save(commit=False)
-#             paid.customer = watercons.customer
-#             paid.irrigation = watercons
-#             paid.save()
-#             return redirect("index")
-#     else:
-#         form = PaidsForm(
-#             initial={
-#                 "receiptNumber": next_receipt_no,
-#                 "cost": watercons.cost,
-#                 "paid": 0,
-#                 "balance": -watercons.cost,
-#             },
-#             watercons=watercons
-#         )
-#         # self.fields["cubicMeters"].initial = watercons.cubicMeters
-
-#     return render(request, "create_payment.html", {"form": form, "watercons": watercons})
-
 # # ---------------------------
 # # UPDATE PAYMENT
 # # ---------------------------
@@ -178,7 +128,7 @@ def paids(request):
 #     model = Paids
 #     form_class = PaidsForm
 #     template_name = 'paid_create_update.html'
-#     success_url = reverse_lazy('index')
+#     success_url = reverse_lazy('paids')
 
 #     def form_valid(self, form):
 #         obj = form.save(commit=False)
@@ -187,6 +137,8 @@ def paids(request):
 #         if not obj.customer:
 #             obj.customer = self.get_object().customer
 #         obj.save()
+
+#         messages.success(self.request, f"💾 Η απόδειξη #{obj.receiptNumber} ενημερώθηκε επιτυχώς.")
 #         return super().form_valid(form)
 
 
@@ -205,20 +157,19 @@ def paids(request):
 #             paid.customer = watercons.customer
 #             paid.irrigation = watercons
 #             paid.save()
-#             return redirect("index")
+#             messages.success(request, f"✅ Δημιουργήθηκε επιτυχώς η απόδειξη #{paid.receiptNumber}.")
+#             return redirect("paids")
 #     else:
 #         form = PaidsForm(initial={
 #             "receiptNumber": next_receipt_no,
 #             "cost": watercons.cost,
 #             "paid": 0,
 #             "balance": -watercons.cost,
-#             "notes": "",
+#             "irrigation": watercons,
+#             "customer": watercons.customer,
 #         })
 
-#     return render(request, "paid_create_update.html", {
-#         "form": form,
-#         "watercons": watercons
-#     })
+#     return render(request, "paid_create_update.html", {"form": form})
 
 
 # ---------------------------
@@ -231,17 +182,34 @@ class PaidsUpdateView(PermissionRequiredMixin, UpdateView):
     template_name = 'paid_create_update.html'
     success_url = reverse_lazy('paids')
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # Το 'object' είναι το Paids instance που ενημερώνουμε (self.object)
+        
+        # Προσθέτουμε το αντικείμενο Paids (object) και τα σχετικά του αντικείμενα
+        # για να τα χρησιμοποιήσουμε στα readonly πεδία στο template.
+        paids_instance = self.get_object() 
+        context['irrigation'] = paids_instance.irrigation
+        context['customer'] = paids_instance.customer
+        
+        return context
+
     def form_valid(self, form):
+        # ... (Ο υπόλοιπος κώδικας form_valid παραμένει ίδιος) ...
         obj = form.save(commit=False)
+        # Τα irrigation & customer είναι ήδη attached στο obj αν είναι instance (update)
+        # Αλλά τα ξαναβάζουμε για λόγους ασφαλείας, αν και δεν χρειάζεται πια.
         if not obj.irrigation:
-            obj.irrigation = self.get_object().irrigation
+             obj.irrigation = self.get_object().irrigation
         if not obj.customer:
-            obj.customer = self.get_object().customer
+             obj.customer = self.get_object().customer
+             
         obj.save()
 
+        next_url = self.request.POST.get('next_url', self.success_url)
+        
         messages.success(self.request, f"💾 Η απόδειξη #{obj.receiptNumber} ενημερώθηκε επιτυχώς.")
-        return super().form_valid(form)
-
+        return redirect(next_url)
 
 # ---------------------------
 # CREATE PAYMENT
@@ -258,21 +226,30 @@ def create_payment(request, pk):
             paid.customer = watercons.customer
             paid.irrigation = watercons
             paid.save()
+
+            # Διαχείριση URL επιστροφής
+            next_url = request.POST.get('next_url', reverse_lazy('paids'))
+            
             messages.success(request, f"✅ Δημιουργήθηκε επιτυχώς η απόδειξη #{paid.receiptNumber}.")
-            return redirect("paids")
+            return redirect(next_url) # Χρησιμοποιούμε το next_url
     else:
+        # ... (Ο κώδικας initial values παραμένει ο ίδιος)
         form = PaidsForm(initial={
             "receiptNumber": next_receipt_no,
             "cost": watercons.cost,
             "paid": 0,
             "balance": -watercons.cost,
-            "irrigation": watercons,
-            "customer": watercons.customer,
         })
-
-    return render(request, "paid_create_update.html", {"form": form})
-
-
+        # Προσθέστε τα customer και irrigation στα context αν θέλετε να τα χρησιμοποιήσετε στο template
+    
+    return render(request, "paid_create_update.html", {
+        "form": form,
+        # Περνάμε τα αντικείμενα για να τα δείξουμε στα readonly πεδία στο template
+        "watercons": watercons, 
+        "customer": watercons.customer 
+    })
+    
+    
 # ---------------------------
 # WATERCONSUMPTIONS / IRRIGATIONS
 # ---------------------------

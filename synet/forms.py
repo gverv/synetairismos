@@ -1,9 +1,11 @@
-# forms.py
+# synet/forms.py
 import datetime
 from datetime import date
 from django import forms
 from django.contrib.auth.models import User
 from django.forms import ModelForm, TextInput, NumberInput, Select
+from crispy_forms.helper import FormHelper
+from crispy_forms.layout import Layout, Row, Column
 
 from .models import  Persons, Counters, Paids, Fields, WaterCons, Receivers
 
@@ -87,99 +89,71 @@ class CountersForm(forms.ModelForm):
         }        
  
 
-
-# class PaidsForm(forms.ModelForm):
-#     class Meta:
-#         model = Paids
-#         fields = [
-#             'receiptNumber',  # Αρ Απόδειξης
-#             'cost',  # Αξία
-#             'paid',  # Πλήρωσε
-#             'balance',  # Ισοζύγιο
-#             'paymentDate',  # Ημ/νία Πληρωμής
-#             'receiver',  # Εισπράκτορας
-#             'collectorFeeRate',  # Ποσοστό Εισπράκτορα
-#             'collectorFee',  # Αμοιβή Εισπράκτορα
-#             'notes',
-#             'irrigation',  # Ποτισμός
-#             'customer',  # Καταναλωτής
-#         ]
-#         # widgets = {
-#         #     'notes': forms.Textarea(attrs={"rows": 2}),
-#         #     'paymentDate': forms.DateInput(attrs={"type": "date"}),
-#         #     'irrigation': forms.TextInput(attrs={'readonly': 'readonly'}),
-#         #     'customer': forms.TextInput(attrs={'readonly': 'readonly'}),
-#         #     'collectorFeeRate': forms.NumberInput(attrs={'step': '0.01'}),
-#         #     'collectorFee': forms.NumberInput(attrs={'step': '0.01'}),
-#         # }
-#         labels = {
-#             'receiptNumber': 'Αρ Απόδειξης',
-#             'cost': 'Αξία',
-#             'paid': 'Πλήρωσε',
-#             'balance': 'Ισοζύγιο',
-#             'paymentDate': 'Ημ/νία Πληρωμής',
-#             'receiver': 'Εισπράκτορας',
-#             'irrigation': 'Ποτισμός',
-#             'customer': 'Καταναλωτής',
-#             'collectorFeeRate': 'Ποσοστό Εισπράκτορα',
-#             'collectorFee': 'Αμοιβή Εισπράκτορα',
-#             'notes': 'Σημειώσεις',
-#         }
-
-#     def __init__(self, *args, **kwargs):
-#         # Πιάσε το watercons από τα kwargs
-#         watercons = kwargs.pop("watercons", None)
-#         super().__init__(*args, **kwargs)
-
-#         if watercons:
-#             self.fields["customer"].initial = str(watercons.customer)
-#             # self.fields["cubicMeters"].initial = watercons.cubicMeters
-#             # self.fields["cost_display"].initial = watercons.cost
-
 class PaidsForm(forms.ModelForm):
     class Meta:
         model = Paids
         fields = [
-            'receiptNumber',  # Αρ Απόδειξης
-            'cost',  # Αξία
-            'paid',  # Πλήρωσε
-            'balance',  # Ισοζύγιο
-            'paymentDate',  # Ημ/νία Πληρωμής
-            'receiver',  # Εισπράκτορας
-            'collectorFeeRate',  # Ποσοστό Εισπράκτορα
-            'collectorFee',  # Αμοιβή Εισπράκτορα
-            'notes',
-            # 'irrigation',  # Ποτισμός
-            # 'customer',  # Καταναλωτής
+            'receiptNumber', 'cost', 'paid', 'balance', 'paymentDate', 'receiver',
+            'collectorFeeRate', 'collectorFee', 'notes',
+            # Αφαιρέστε τα 'irrigation' και 'customer' από τα fields της φόρμας
+            # καθώς τα χειρίζεστε χειροκίνητα στο view και στο template.
         ]
         widgets = {
-            'notes': forms.Textarea(attrs={'rows': 2}),
+            # ... (widgets) ...
+            'notes': forms.Textarea(attrs={'rows': 2, 'style': 'resize: vertical; max-height: 100px; overflow-y: auto;'}),
             'paymentDate': forms.DateInput(attrs={'type': 'date'}, format='%Y-%m-%d'),
-            # 'paymentDate': forms.DateInput(attrs={'type': 'date'}),
-            # 'irrigation': forms.TextInput(attrs={'readonly': 'readonly'}),
-            # 'customer': forms.TextInput(attrs={'readonly': 'readonly'}),
             'collectorFeeRate': forms.NumberInput(attrs={'step': '0.01'}),
-            'collectorFee': forms.NumberInput(attrs={'step': '0.01'}),
+            'collectorFee': forms.NumberInput(attrs={'step': '0.01', 'readonly': 'readonly'}), 
         }
         labels = {
-            'receiptNumber': 'Αρ Απόδειξης',
-            'cost': 'Αξία',
-            'paid': 'Πλήρωσε',
-            'balance': 'Ισοζύγιο',
-            'paymentDate': 'Ημ/νία Πληρωμής',
-            'receiver': 'Εισπράκτορας',
-            'irrigation': 'Ποτισμός',
-            'customer': 'Καταναλωτής',
-            'collectorFeeRate': 'Ποσοστό Εισπράκτορα',
-            'collectorFee': 'Αμοιβή Εισπράκτορα',
-            'notes': 'Σημειώσεις',
+            # ... (labels) ...
+            'receiptNumber': 'Αρ. Απόδειξης', 'cost': 'Αξία', 'paid': 'Πλήρωσε',
+            'balance': 'Ισοζύγιο', 'paymentDate': 'Ημ/νία Πληρωμής', 'receiver': 'Εισπράκτορας',
+            'collectorFeeRate': 'Ποσοστό Εισπρ.', 'collectorFee': 'Αμοιβή Εισπρ.', 'notes': 'Σημειώσεις',
         }
+
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # Βάλε default τιμές ή readonly ρυθμίσεις αν χρειάζεται
-        self.fields['paid'].initial = self.fields['paid'].initial or 0
-        self.fields['balance'].initial = self.fields['balance'].initial or 0
-    #     self.fields['paymentDate'].initial = date.today().strftime("%Y-%m-%d")
-        # self.fields['paymentDate'].initial = forms.DateField().widget.attrs['value'] = date.today().strftime("%Y-%m-%d")
-        # self.fields['collectorFeeRate'].initial = self.fields['collectorFeeRate'].initial or
+        
+        self.fields['balance'].widget.attrs['readonly'] = 'readonly'
+        self.fields['receiptNumber'].widget.attrs['readonly'] = 'readonly'
+
+        self.helper = FormHelper()
+        self.helper.form_id = 'receiptForm'
+        self.helper.layout = Layout(
+            # 1η Σειρά: Αρ. Απόδειξης (6) & Αξία (6) - Χρησιμοποιούμε 'col-6'
+            Row(
+                Column('receiptNumber', css_class='form-group col-6 mb-0'),
+                Column('cost', css_class='form-group col-6 mb-0'),
+                css_class='form-row'
+            ),
+            # 2η Σειρά: Πλήρωσε (6) & Ισοζύγιο (6) - Χρησιμοποιούμε 'col-6'
+            Row(
+                Column('paid', css_class='form-group col-6 mb-0'),
+                Column('balance', css_class='form-group col-6 mb-0'),
+                css_class='form-row'
+            ),
+            # 3η Σειρά: Ημ/νία Πληρωμής (4) & Εισπράκτορας (8) - Χρησιμοποιούμε 'col-4' & 'col-8'
+            Row(
+                Column('paymentDate', css_class='form-group col-4 mb-0'),
+                Column('receiver', css_class='form-group col-8 mb-0'),
+                css_class='form-row'
+            ),
+            # 4η Σειρά: Ποσοστό Εισπρ. (6) & Αμοιβή Εισπρ. (6) - Χρησιμοποιούμε 'col-6'
+            Row(
+                Column('collectorFeeRate', css_class='form-group col-6 mb-0'),
+                Column('collectorFee', css_class='form-group col-6 mb-0'),
+                css_class='form-row'
+            ),
+            # 5η Σειρά: Σημειώσεις (12)
+            'notes',
+        )
+        # 3. Αρχικές τιμές για create (μόνο αν δεν υπάρχουν)        
+        if self.instance.pk is None:
+            self.fields['paid'].initial = self.fields['paid'].initial or 0
+            self.fields['balance'].initial = self.fields['balance'].initial or 0
+        
+        # 4. Αρχικές τιμές για update (μόνο αν δεν υπάρχουν)
+        # self.fields['collectorFeeRate'].initial = self.fields['collectorFeeRate'].initial or 0.06
+        

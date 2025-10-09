@@ -1,64 +1,123 @@
+<!-- templates/paid_create_update.html -->
 {% extends "main.html" %}
 {% load crispy_forms_tags %}
 
 {% block content %}
 <div class="container-fluid mt-4">
-    {% if form.instance.pk %}
-        <h2 style="font-size:1.3rem;">Ενημέρωση Απόδειξης #{{ form.instance.receiptNumber }}</h2>
+    {# Τίτλος #}
+    {% if object %}
+        <h2 class="form-title">Ενημέρωση Απόδειξης #{{ object.receiptNumber }}</h2>
     {% else %}
-        <h2 style="font-size:1.3rem;">Έκδοση Απόδειξης</h2>
+        <h2 class="form-title">Έκδοση Απόδειξης</h2>
     {% endif %}
 
     <form method="post" id="receiptForm">
         {% csrf_token %}
-        {{ form|crispy }}
+        
+        {# Πεδία Ποτισμός (6) και Καταναλωτής (6) - READONLY - Τώρα με col-6 #}
         <div class="row mb-3">
-          <div class="col-md-6">
-            <label class="form-label">Ποτισμός</label>
-            <input type="text" class="form-control" value="{{ form.instance.irrigation }}" readonly>
-          </div>
-          {% comment %} <div class="col-md-6">
-            <label class="form-label">Καταναλωτής</label>
-            <input type="text" class="form-control" value="{{ form.instance.customer }}" readonly>
-          </div>
-        </div> {% endcomment %}
+            <div class="col-6 form-group">
+                <label class="form-label">Ποτισμός</label>
+                <input type="text" class="form-control" 
+                       value="{% if object %}{{ object.irrigation }}{% else %}{{ form.initial.irrigation }}{% endif %}" 
+                       readonly>
+            </div>
+            <div class="col-6 form-group">
+                <label class="form-label">Καταναλωτής</label>
+                <input type="text" class="form-control" 
+                       value="{% if object %}{{ object.customer }}{% else %}{{ form.initial.customer }}{% endif %}" 
+                       readonly>
+            </div>
+        </div>
 
-        <div class="d-flex flex-column flex-md-row gap-2 mt-2">
+        {# Η φόρμα με το Crispy Layout #}
+        {{ form|crispy }}
+
+        {# Κρυφό πεδίο για το URL επιστροφής #}
+        <input type="hidden" name="next_url" id="next_url" value="{{ request.META.HTTP_REFERER|default:'paids' }}">
+
+        {# Κουμπιά: Πληρωμή, Αποθήκευση/Ενημέρωση, Επιστροφή #}
+        <div class="d-flex flex-column flex-sm-row justify-content-start gap-2 mt-2 button-group">
             <button type="button" class="btn btn-primary" id="fillPayment">Πληρωμή</button>
-            {% if form.instance.pk %}
-                <button type="submit" class="btn btn-success">Ενημέρωση</button>
+            {% if object %}
+                <button type="submit" class="btn btn-success" id="saveBtn">Ενημέρωση</button>
             {% else %}
-                <button type="submit" class="btn btn-success">Αποθήκευση</button>
+                <button type="submit" class="btn btn-success" id="saveBtn">Αποθήκευση</button>
             {% endif %}
+            <button type="button" class="btn btn-secondary" id="backBtn">Επιστροφή</button>
         </div>
     </form>
 </div>
 
 <style>
-  #saveBtn:focus {
-    outline: 3px solid #28a745;
-    outline-offset: 3px;
-    box-shadow: 0 0 8px #28a745;
-  }
-  @media (max-width: 576px) {
-    h2 {
-      font-size: 1.1rem !important;
+    /* Βάση για όλες τις οθόνες */
+    .form-title {
+        font-size: 1.3rem; 
     }
-    .container-fluid {
-      padding-left: 5px !important;
-      padding-right: 5px !important;
+    .form-control, .form-label, .btn {
+        font-size: 0.95rem;
     }
-    .btn {
-      font-size: 0.95rem;
-      padding: 0.4rem 0.7rem;
+    #saveBtn:focus {
+        outline: 3px solid #28a745;
+        outline-offset: 3px;
+        box-shadow: 0 0 8px #28a745;
     }
-    .mt-2 {
-      margin-top: 0.7rem !important;
+    
+    /* ************************************************** */
+    /* Mobile Override: Αναγκάζουμε τα πεδία να είναι 2/σειρά */
+    /* ************************************************** */
+    @media (max-width: 576px) {
+        /* ΕΠΙΘΕΤΙΚΟ CSS: Διασφαλίζουμε ότι οι στήλες έχουν το σωστό πλάτος */
+        .col-6 {
+            flex: 0 0 auto !important;
+            width: 50% !important;
+        }
+        .col-4 {
+            flex: 0 0 auto !important;
+            width: 33.333333% !important;
+        }
+        .col-8 {
+            flex: 0 0 auto !important;
+            width: 66.666667% !important;
+        }
+
+        /* ΜΕΙΩΣΗ ΓΡΑΜΜΑΤΟΣΕΙΡΑΣ για να χωρέσει η φόρμα */
+        .form-title {
+            font-size: 1.0rem !important; 
+        }
+        .form-control, .form-label, .btn {
+            font-size: 0.7rem; 
+            padding: 0.3rem 0.5rem; 
+        }
+        
+        .container-fluid {
+            padding-left: 5px !important;
+            padding-right: 5px !important;
+        }
+        .mt-2 {
+            margin-top: 0.7rem !important;
+        }
+        
+        /* Κουμπιά σε μία σειρά */
+        .flex-sm-row {
+            flex-direction: row !important; 
+            flex-wrap: nowrap; 
+        }
+        .btn {
+            white-space: nowrap; 
+            font-size: 0.65rem; 
+            padding: 0.4rem 0.2rem;
+        }
+        /* Μείωση padding για στήλες */
+        .col-6, .col-4, .col-8 {
+            padding-left: 3px !important;
+            padding-right: 3px !important;
+        }
     }
-  }
 </style>
 
 <script>
+// ... (Ο κώδικας JavaScript παραμένει ο ίδιος) ...
 document.addEventListener("DOMContentLoaded", function() {
     let costField = document.querySelector("[name='cost']");
     let paidField = document.querySelector("[name='paid']");
@@ -67,24 +126,14 @@ document.addEventListener("DOMContentLoaded", function() {
     let receiverField = document.querySelector("[name='receiver']");
     let collectorFeeRateField = document.getElementById("id_collectorFeeRate");
     let collectorFeeField = document.getElementById("id_collectorFee");
+    let backBtn = document.getElementById("backBtn");
 
-    // Αυτόματος υπολογισμός υπολοίπου
-    paidField.addEventListener("input", function() {
+    function updateBalance() {
         let paidValue = parseFloat(paidField.value) || 0;
         let costValue = parseFloat(costField.value) || 0;
         balanceField.value = (paidValue - costValue).toFixed(2);
         updateCollectorFee();
-    });
-
-    // Προεπιλεγμένες τιμές με "Πληρωμή"
-    document.getElementById("fillPayment").addEventListener("click", function() {
-        paidField.value = costField.value;
-        balanceField.value = 0;
-        paymentDateField.value = new Date().toISOString().slice(0, 10);
-        receiverField.value = 1;
-        collectorFeeRateField.value = 0.06;
-        updateCollectorFee();
-    });
+    }
 
     function updateCollectorFee() {
         const paid = parseFloat(paidField.value) || 0;
@@ -92,7 +141,32 @@ document.addEventListener("DOMContentLoaded", function() {
         collectorFeeField.value = (paid * rate).toFixed(2);
     }
 
+    // --- Event Listeners ---
+    paidField.addEventListener("input", updateBalance);
     collectorFeeRateField.addEventListener("input", updateCollectorFee);
+
+    // Προεπιλεγμένες τιμές με "Πληρωμή"
+    document.getElementById("fillPayment").addEventListener("click", function() {
+        paidField.value = costField.value;
+        balanceField.value = 0;
+        paymentDateField.value = new Date().toISOString().slice(0, 10);
+        receiverField.value = 1; 
+        collectorFeeRateField.value = 0.06; 
+        updateCollectorFee();
+    });
+
+    // Χειρισμός κουμπιού Επιστροφή
+    backBtn.addEventListener("click", function() {
+        const nextUrl = document.getElementById("next_url").value;
+        if (document.referrer && document.referrer.includes(window.location.host)) {
+             history.back();
+        } else {
+             window.location.href = nextUrl; 
+        }
+    });
+
+    // Αρχικός υπολογισμός
+    updateBalance();
 });
 </script>
 {% endblock %}
