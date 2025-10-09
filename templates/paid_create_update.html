@@ -14,24 +14,24 @@
     <form method="post" id="receiptForm">
         {% csrf_token %}
         
+
+        {# Η φόρμα με το Crispy Layout #}
+        {{ form|crispy }}
         {# Πεδία Ποτισμός (6) και Καταναλωτής (6) - READONLY - Τώρα με col-6 #}
         <div class="row mb-3">
-            <div class="col-6 form-group">
+            <div class="col-12 form-group">
                 <label class="form-label">Ποτισμός</label>
                 <input type="text" class="form-control" 
                        value="{% if object %}{{ object.irrigation }}{% else %}{{ form.initial.irrigation }}{% endif %}" 
                        readonly>
             </div>
-            <div class="col-6 form-group">
+            {% comment %} <div class="col-6 form-group">
                 <label class="form-label">Καταναλωτής</label>
                 <input type="text" class="form-control" 
                        value="{% if object %}{{ object.customer }}{% else %}{{ form.initial.customer }}{% endif %}" 
                        readonly>
-            </div>
+            </div> {% endcomment %}
         </div>
-
-        {# Η φόρμα με το Crispy Layout #}
-        {{ form|crispy }}
 
         {# Κρυφό πεδίο για το URL επιστροφής #}
         <input type="hidden" name="next_url" id="next_url" value="{{ request.META.HTTP_REFERER|default:'paids' }}">
@@ -50,70 +50,77 @@
 </div>
 
 <style>
-    /* Βάση για όλες τις οθόνες */
+@media (max-width: 576px) {
+    .form-label {
+        font-size: 0.7rem !important;
+    }
     .form-title {
-        font-size: 1.3rem; 
+        font-size: 1rem !important;
     }
+
     .form-control, .form-label, .btn {
-        font-size: 0.95rem;
+        font-size: 0.7rem !important;
+        padding: 0.3rem 0.5rem !important;
     }
-    #saveBtn:focus {
-        outline: 3px solid #28a745;
-        outline-offset: 3px;
-        box-shadow: 0 0 8px #28a745;
+
+    .container-fluid {
+        padding-left: 5px !important;
+        padding-right: 5px !important;
+    }
+
+    .form-group {
+        margin-bottom: 0.5rem !important;
+    }
+
+    .col-6, .col-4, .col-8 {
+        padding-left: 3px !important;
+        padding-right: 3px !important;
+    }
+
+    .row {
+        display: flex;
+        flex-wrap: nowrap;
+    }
+
+    .col-6 {
+        flex: 0 0 50% !important;
+        max-width: 50% !important;
+        padding-left: 3px !important;
+        padding-right: 3px !important;
+    }
+
+    .col-4 {
+        flex: 0 0 33.3333% !important;
+        max-width: 33.3333% !important;
+    }
+
+    .col-8 {
+        flex: 0 0 66.6667% !important;
+        max-width: 66.6667% !important;
+    }
+
+    .form-control, label {
+        font-size: 0.7rem !important;
     }
     
-    /* ************************************************** */
-    /* Mobile Override: Αναγκάζουμε τα πεδία να είναι 2/σειρά */
-    /* ************************************************** */
-    @media (max-width: 576px) {
-        /* ΕΠΙΘΕΤΙΚΟ CSS: Διασφαλίζουμε ότι οι στήλες έχουν το σωστό πλάτος */
-        .col-6 {
-            flex: 0 0 auto !important;
-            width: 50% !important;
-        }
-        .col-4 {
-            flex: 0 0 auto !important;
-            width: 33.333333% !important;
-        }
-        .col-8 {
-            flex: 0 0 auto !important;
-            width: 66.666667% !important;
-        }
-
-        /* ΜΕΙΩΣΗ ΓΡΑΜΜΑΤΟΣΕΙΡΑΣ για να χωρέσει η φόρμα */
-        .form-title {
-            font-size: 1.0rem !important; 
-        }
-        .form-control, .form-label, .btn {
-            font-size: 0.7rem; 
-            padding: 0.3rem 0.5rem; 
-        }
-        
-        .container-fluid {
-            padding-left: 5px !important;
-            padding-right: 5px !important;
-        }
-        .mt-2 {
-            margin-top: 0.7rem !important;
-        }
-        
-        /* Κουμπιά σε μία σειρά */
-        .flex-sm-row {
-            flex-direction: row !important; 
-            flex-wrap: nowrap; 
-        }
-        .btn {
-            white-space: nowrap; 
-            font-size: 0.65rem; 
-            padding: 0.4rem 0.2rem;
-        }
-        /* Μείωση padding για στήλες */
-        .col-6, .col-4, .col-8 {
-            padding-left: 3px !important;
-            padding-right: 3px !important;
-        }
+    /* Buttons in one row */
+    .button-group {
+        flex-direction: row !important;
+        flex-wrap: nowrap !important;
     }
+
+    .button-group .btn {
+        font-size: 0.65rem !important;
+        padding: 0.4rem 0.2rem !important;
+        white-space: nowrap;
+    }
+
+    /* Notes field scroll */
+    textarea[name="notes"] {
+        max-height: 100px !important;
+        overflow-y: auto !important;
+    }
+}
 </style>
 
 <script>

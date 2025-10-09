@@ -95,18 +95,17 @@ class PaidsForm(forms.ModelForm):
         fields = [
             'receiptNumber', 'cost', 'paid', 'balance', 'paymentDate', 'receiver',
             'collectorFeeRate', 'collectorFee', 'notes',
-            # Αφαιρέστε τα 'irrigation' και 'customer' από τα fields της φόρμας
-            # καθώς τα χειρίζεστε χειροκίνητα στο view και στο template.
         ]
         widgets = {
-            # ... (widgets) ...
-            'notes': forms.Textarea(attrs={'rows': 2, 'style': 'resize: vertical; max-height: 100px; overflow-y: auto;'}),
+            'notes': forms.Textarea(attrs={
+                'rows': 2,
+                'style': 'resize: vertical; max-height: 100px; overflow-y: auto;'
+            }),
             'paymentDate': forms.DateInput(attrs={'type': 'date'}, format='%Y-%m-%d'),
             'collectorFeeRate': forms.NumberInput(attrs={'step': '0.01'}),
             'collectorFee': forms.NumberInput(attrs={'step': '0.01', 'readonly': 'readonly'}), 
         }
         labels = {
-            # ... (labels) ...
             'receiptNumber': 'Αρ. Απόδειξης', 'cost': 'Αξία', 'paid': 'Πλήρωσε',
             'balance': 'Ισοζύγιο', 'paymentDate': 'Ημ/νία Πληρωμής', 'receiver': 'Εισπράκτορας',
             'collectorFeeRate': 'Ποσοστό Εισπρ.', 'collectorFee': 'Αμοιβή Εισπρ.', 'notes': 'Σημειώσεις',
@@ -118,37 +117,32 @@ class PaidsForm(forms.ModelForm):
         
         self.fields['balance'].widget.attrs['readonly'] = 'readonly'
         self.fields['receiptNumber'].widget.attrs['readonly'] = 'readonly'
-
         self.helper = FormHelper()
         self.helper.form_id = 'receiptForm'
         self.helper.layout = Layout(
-            # 1η Σειρά: Αρ. Απόδειξης (6) & Αξία (6) - Χρησιμοποιούμε 'col-6'
             Row(
                 Column('receiptNumber', css_class='form-group col-6 mb-0'),
                 Column('cost', css_class='form-group col-6 mb-0'),
                 css_class='form-row'
             ),
-            # 2η Σειρά: Πλήρωσε (6) & Ισοζύγιο (6) - Χρησιμοποιούμε 'col-6'
             Row(
                 Column('paid', css_class='form-group col-6 mb-0'),
                 Column('balance', css_class='form-group col-6 mb-0'),
                 css_class='form-row'
             ),
-            # 3η Σειρά: Ημ/νία Πληρωμής (4) & Εισπράκτορας (8) - Χρησιμοποιούμε 'col-4' & 'col-8'
             Row(
                 Column('paymentDate', css_class='form-group col-4 mb-0'),
                 Column('receiver', css_class='form-group col-8 mb-0'),
                 css_class='form-row'
             ),
-            # 4η Σειρά: Ποσοστό Εισπρ. (6) & Αμοιβή Εισπρ. (6) - Χρησιμοποιούμε 'col-6'
             Row(
                 Column('collectorFeeRate', css_class='form-group col-6 mb-0'),
                 Column('collectorFee', css_class='form-group col-6 mb-0'),
                 css_class='form-row'
             ),
-            # 5η Σειρά: Σημειώσεις (12)
             'notes',
         )
+
         # 3. Αρχικές τιμές για create (μόνο αν δεν υπάρχουν)        
         if self.instance.pk is None:
             self.fields['paid'].initial = self.fields['paid'].initial or 0
