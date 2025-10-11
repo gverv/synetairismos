@@ -3,6 +3,9 @@ from django.urls import path
 from django.contrib.auth import views as auth_views
 from django.contrib.auth.views import LoginView
 from django.contrib.auth.decorators import login_required
+from django.urls import path
+
+from .views import chrome_devtools_config
 from . import views
 
 urlpatterns = [
@@ -48,4 +51,8 @@ urlpatterns = [
 
     # SEARCH
     path('search/', login_required(views.global_search), name='global_search'),
+
+
+    path('.well-known/appspecific/com.chrome.devtools.json', chrome_devtools_config),
+
 ]

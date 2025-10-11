@@ -120,57 +120,6 @@ def paids(request):
         'sort_by': sort_by
     })
 
-# # ---------------------------
-# # UPDATE PAYMENT
-# # ---------------------------
-# class PaidsUpdateView(PermissionRequiredMixin, UpdateView):
-#     permission_required = 'synet.change_model'
-#     model = Paids
-#     form_class = PaidsForm
-#     template_name = 'paid_create_update.html'
-#     success_url = reverse_lazy('paids')
-
-#     def form_valid(self, form):
-#         obj = form.save(commit=False)
-#         if not obj.irrigation:
-#             obj.irrigation = self.get_object().irrigation
-#         if not obj.customer:
-#             obj.customer = self.get_object().customer
-#         obj.save()
-
-#         messages.success(self.request, f"💾 Η απόδειξη #{obj.receiptNumber} ενημερώθηκε επιτυχώς.")
-#         return super().form_valid(form)
-
-
-# # ---------------------------
-# # CREATE PAYMENT
-# # ---------------------------
-# def create_payment(request, pk):
-#     watercons = get_object_or_404(WaterCons, pk=pk)
-#     last_paid = Paids.objects.order_by("-receiptNumber").first()
-#     next_receipt_no = (last_paid.receiptNumber + 1) if last_paid else 1
-
-#     if request.method == "POST":
-#         form = PaidsForm(request.POST)
-#         if form.is_valid():
-#             paid = form.save(commit=False)
-#             paid.customer = watercons.customer
-#             paid.irrigation = watercons
-#             paid.save()
-#             messages.success(request, f"✅ Δημιουργήθηκε επιτυχώς η απόδειξη #{paid.receiptNumber}.")
-#             return redirect("paids")
-#     else:
-#         form = PaidsForm(initial={
-#             "receiptNumber": next_receipt_no,
-#             "cost": watercons.cost,
-#             "paid": 0,
-#             "balance": -watercons.cost,
-#             "irrigation": watercons,
-#             "customer": watercons.customer,
-#         })
-
-#     return render(request, "paid_create_update.html", {"form": form})
-
 
 # ---------------------------
 # UPDATE PAYMENT
@@ -185,7 +134,6 @@ class PaidsUpdateView(PermissionRequiredMixin, UpdateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         # Το 'object' είναι το Paids instance που ενημερώνουμε (self.object)
-        
         # Προσθέτουμε το αντικείμενο Paids (object) και τα σχετικά του αντικείμενα
         # για να τα χρησιμοποιήσουμε στα readonly πεδία στο template.
         paids_instance = self.get_object() 
@@ -195,7 +143,6 @@ class PaidsUpdateView(PermissionRequiredMixin, UpdateView):
         return context
 
     def form_valid(self, form):
-        # ... (Ο υπόλοιπος κώδικας form_valid παραμένει ίδιος) ...
         obj = form.save(commit=False)
         # Τα irrigation & customer είναι ήδη attached στο obj αν είναι instance (update)
         # Αλλά τα ξαναβάζουμε για λόγους ασφαλείας, αν και δεν χρειάζεται πια.
@@ -203,7 +150,6 @@ class PaidsUpdateView(PermissionRequiredMixin, UpdateView):
              obj.irrigation = self.get_object().irrigation
         if not obj.customer:
              obj.customer = self.get_object().customer
-             
         obj.save()
 
         next_url = self.request.POST.get('next_url', self.success_url)
@@ -233,14 +179,12 @@ def create_payment(request, pk):
             messages.success(request, f"✅ Δημιουργήθηκε επιτυχώς η απόδειξη #{paid.receiptNumber}.")
             return redirect(next_url) # Χρησιμοποιούμε το next_url
     else:
-        # ... (Ο κώδικας initial values παραμένει ο ίδιος)
         form = PaidsForm(initial={
             "receiptNumber": next_receipt_no,
             "cost": watercons.cost,
             "paid": 0,
             "balance": -watercons.cost,
         })
-        # Προσθέστε τα customer και irrigation στα context αν θέλετε να τα χρησιμοποιήσετε στο template
     
     return render(request, "paid_create_update.html", {
         "form": form,
@@ -559,3 +503,13 @@ def my_list_view(request):
 
 
 
+
+def chrome_devtools_config(request):
+    if not request.META.get('REMOTE_ADDR') in ['127.0.0.1', '::1']:
+        return JsonResponse({}, status=403)
+    return JsonResponse({
+        "workspace": {
+            "root": "C:\\Users\\gverv\\Nextcloud\\Documents\\seminaria\\django\\synetairismos\\synetairismos",
+            "uuid": "123e4567-e89b-12d3-a456-426614174000"
+        }
+    })

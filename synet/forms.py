@@ -111,12 +111,19 @@ class PaidsForm(forms.ModelForm):
             'collectorFeeRate': 'Ποσοστό Εισπρ.', 'collectorFee': 'Αμοιβή Εισπρ.', 'notes': 'Σημειώσεις',
         }
 
-
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        
+
+        self.fields['receiver'] = forms.ModelChoiceField(
+            queryset=Receivers.objects.all(),
+            widget=forms.Select(attrs={'class': 'form-control'}),
+            required=False,
+            empty_label="Επιλέξτε εισπράκτορα"
+        )
+
         self.fields['balance'].widget.attrs['readonly'] = 'readonly'
         self.fields['receiptNumber'].widget.attrs['readonly'] = 'readonly'
+
         self.helper = FormHelper()
         self.helper.form_id = 'receiptForm'
         self.helper.layout = Layout(
@@ -143,11 +150,9 @@ class PaidsForm(forms.ModelForm):
             'notes',
         )
 
-        # 3. Αρχικές τιμές για create (μόνο αν δεν υπάρχουν)        
         if self.instance.pk is None:
             self.fields['paid'].initial = self.fields['paid'].initial or 0
             self.fields['balance'].initial = self.fields['balance'].initial or 0
-        
         # 4. Αρχικές τιμές για update (μόνο αν δεν υπάρχουν)
         # self.fields['collectorFeeRate'].initial = self.fields['collectorFeeRate'].initial or 0.06
         

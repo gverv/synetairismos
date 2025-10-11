@@ -1,6 +1,6 @@
 <!-- templates/paid_create_update.html -->
 {% extends "main.html" %}
-{% load crispy_forms_tags %}
+{% comment %} {% load crispy_forms_tags %} {% endcomment %}
 
 {% block content %}
 <div class="container-fluid mt-4">
@@ -46,9 +46,8 @@
                        value="{{ form.initial.paymentDate|date:'Y-m-d' }}">
             </div>
             <div class="col-8">
-                <label for="receiver" class="form-label">Εισπράκτορας</label>
-                <input type="text" class="form-control" id="receiver" name="receiver"
-                       value="{{ form.initial.receiver }}">
+                <label for="id_receiver" class="form-label">Εισπράκτορας</label>
+                {{ form.receiver }}
             </div>
         </div>
 
@@ -80,7 +79,7 @@
                        value="{% if object %}{{ object.irrigation }}{% else %}{{ watercons }}{% endif %}" readonly>
             </div>
         </div>
-
+{% comment %} 
         <div class="row mb-3">
             <div class="col-12 form-group">
                 <label class="form-label">Καταναλωτής</label>
@@ -88,7 +87,7 @@
                        value="{% if object %}{{ object.customer }}{% else %}{{ customer }}{% endif %}" readonly>
             </div>
         </div>
-
+ {% endcomment %}
         <input type="hidden" name="next_url" id="next_url" value="{{ request.META.HTTP_REFERER|default:'paids' }}">
 
         <div class="d-flex flex-column flex-sm-row justify-content-start gap-2 mt-2 button-group">
@@ -183,7 +182,7 @@ document.addEventListener("DOMContentLoaded", function() {
         balanceField.value = 0;
         paymentDateField.value = new Date().toISOString().slice(0, 10);
         receiverField.value = 1;
-        collectorFeeRateField.value = 0.06;
+        {% comment %} collectorFeeRateField.value = 0.06; {% endcomment %}
         updateCollectorFee();
     });
 
