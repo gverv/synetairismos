@@ -1,0 +1,11 @@
+{
+  "username_env": "MYSQL_USERNAME",
+  "dbname_env": "DBNAME",
+  "host_env": "HOSTENV",
+  "backup_dir": "BACKUPDIR",
+  "log_file": "LOGFILE",
+  "days_to_keep": 7,
+  "dropbox_token_env": "DROPBOX_TOKEN",
+  "mysql_password_env": "MYSQL_PASSWORD",
+  "dropbox_folder": "/backups"
+}

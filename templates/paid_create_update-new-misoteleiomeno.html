@@ -4,7 +4,6 @@
 
 {% block content %}
 <div class="container-fluid mt-4">
-    {# Τίτλος #}
     {% if object %}
         <h2 class="form-title">Ενημέρωση Απόδειξης #{{ object.receiptNumber }}</h2>
     {% else %}
@@ -13,30 +12,85 @@
 
     <form method="post" id="receiptForm">
         {% csrf_token %}
-        
 
-        {# Η φόρμα με το Crispy Layout #}
-        {{ form|crispy }}
-        {# Πεδία Ποτισμός (6) και Καταναλωτής (6) - READONLY - Τώρα με col-6 #}
-        <div class="row mb-3">
-            <div class="col-12 form-group">
-                <label class="form-label">Ποτισμός</label>
-                <input type="text" class="form-control" 
-                       value="{% if object %}{{ object.irrigation }}{% else %}{{ form.initial.irrigation }}{% endif %}" 
-                       readonly>
+        <div class="row">
+            <div class="col-6">
+                <label for="receiptNumber" class="form-label">Αρ. Απόδειξης</label>
+                <input type="text" class="form-control" id="receiptNumber" name="receiptNumber"
+                       value="{{ form.initial.receiptNumber }}" readonly>
             </div>
-            {% comment %} <div class="col-6 form-group">
-                <label class="form-label">Καταναλωτής</label>
-                <input type="text" class="form-control" 
-                       value="{% if object %}{{ object.customer }}{% else %}{{ form.initial.customer }}{% endif %}" 
-                       readonly>
-            </div> {% endcomment %}
+            <div class="col-6">
+                <label for="cost" class="form-label">Αξία</label>
+                <input type="text" class="form-control" id="cost" name="cost"
+                       value="{{ form.initial.cost }}">
+            </div>
         </div>
 
-        {# Κρυφό πεδίο για το URL επιστροφής #}
+        <div class="row mt-2">
+            <div class="col-6">
+                <label for="paid" class="form-label">Πλήρωσε</label>
+                <input type="text" class="form-control" id="paid" name="paid"
+                       value="{{ form.initial.paid|default:0 }}">
+            </div>
+            <div class="col-6">
+                <label for="balance" class="form-label">Ισοζύγιο</label>
+                <input type="text" class="form-control" id="balance" name="balance"
+                       value="{{ form.initial.balance|default:0 }}" readonly>
+            </div>
+        </div>
+
+        <div class="row mt-2">
+            <div class="col-4">
+                <label for="paymentDate" class="form-label">Ημ/νία Πληρωμής</label>
+                <input type="date" class="form-control" id="paymentDate" name="paymentDate"
+                       value="{{ form.initial.paymentDate|date:'Y-m-d' }}">
+            </div>
+            <div class="col-8">
+                <label for="receiver" class="form-label">Εισπράκτορας</label>
+                <input type="text" class="form-control" id="receiver" name="receiver"
+                       value="{{ form.initial.receiver }}">
+            </div>
+        </div>
+
+        <div class="row mt-2">
+            <div class="col-6">
+                <label for="collectorFeeRate" class="form-label">Ποσοστό Εισπρ.</label>
+                <input type="text" class="form-control" id="id_collectorFeeRate" name="collectorFeeRate"
+                       value="{{ form.initial.collectorFeeRate }}">
+            </div>
+            <div class="col-6">
+                <label for="collectorFee" class="form-label">Αμοιβή Εισπρ.</label>
+                <input type="text" class="form-control" id="id_collectorFee" name="collectorFee"
+                       value="{{ form.initial.collectorFee }}" readonly>
+            </div>
+        </div>
+
+        <div class="row mt-2">
+            <div class="col-12">
+                <label for="notes" class="form-label">Σημειώσεις</label>
+                <textarea class="form-control" id="notes" name="notes" rows="2"
+                          style="resize: vertical; max-height: 100px; overflow-y: auto;">{{ form.initial.notes }}</textarea>
+            </div>
+        </div>
+
+        <div class="row mb-3 mt-2">
+            <div class="col-12 form-group">
+                <label class="form-label">Ποτισμός</label>
+                <input type="text" class="form-control"
+                       value="{% if object %}{{ object.irrigation }}{% else %}{{ watercons }}{% endif %}" readonly>
+            </div>
+        </div>
+
+        <div class="row mb-3">
+            <div class="col-12 form-group">
+                <label class="form-label">Καταναλωτής</label>
+                <input type="text" class="form-control"
+                       value="{% if object %}{{ object.customer }}{% else %}{{ customer }}{% endif %}" readonly>
+            </div>
+        </div>
+
         <input type="hidden" name="next_url" id="next_url" value="{{ request.META.HTTP_REFERER|default:'paids' }}">
 
-        {# Κουμπιά: Πληρωμή, Αποθήκευση/Ενημέρωση, Επιστροφή #}
         <div class="d-flex flex-column flex-sm-row justify-content-start gap-2 mt-2 button-group">
             <button type="button" class="btn btn-primary" id="fillPayment">Πληρωμή</button>
             {% if object %}
@@ -51,80 +105,53 @@
 
 <style>
 @media (max-width: 576px) {
-    .form-label {
+    .form-label, .form-control, .btn {
         font-size: 0.7rem !important;
+        padding: 0.3rem 0.5rem !important;
     }
     .form-title {
         font-size: 1rem !important;
     }
-
-    .form-control, .form-label, .btn {
-        font-size: 0.7rem !important;
-        padding: 0.3rem 0.5rem !important;
-    }
-
     .container-fluid {
         padding-left: 5px !important;
         padding-right: 5px !important;
     }
-
     .form-group {
         margin-bottom: 0.5rem !important;
     }
-
     .col-6, .col-4, .col-8 {
         padding-left: 3px !important;
         padding-right: 3px !important;
     }
-
     .row {
         display: flex;
         flex-wrap: nowrap;
     }
-
     .col-6 {
         flex: 0 0 50% !important;
         max-width: 50% !important;
-        padding-left: 3px !important;
-        padding-right: 3px !important;
     }
-
     .col-4 {
         flex: 0 0 33.3333% !important;
         max-width: 33.3333% !important;
     }
-
     .col-8 {
         flex: 0 0 66.6667% !important;
         max-width: 66.6667% !important;
     }
-
-    .form-control, label {
-        font-size: 0.7rem !important;
-    }
-    
-    /* Buttons in one row */
     .button-group {
         flex-direction: row !important;
         flex-wrap: nowrap !important;
     }
-
     .button-group .btn {
         font-size: 0.65rem !important;
         padding: 0.4rem 0.2rem !important;
         white-space: nowrap;
     }
-
-    /* Notes field scroll */
-    textarea[name="notes"] {
-        max-height: 100px !important;
-        overflow-y: auto !important;
-    }
 }
 </style>
 
 <script>
-// ... (Ο κώδικας JavaScript παραμένει ο ίδιος) ...
 document.addEventListener("DOMContentLoaded", function() {
     let costField = document.querySelector("[name='cost']");
     let paidField = document.querySelector("[name='paid']");
@@ -148,17 +175,15 @@ document.addEventListener("DOMContentLoaded", function() {
         collectorFeeField.value = (paid * rate).toFixed(2);
     }
 
-    // --- Event Listeners ---
     paidField.addEventListener("input", updateBalance);
     collectorFeeRateField.addEventListener("input", updateCollectorFee);
 
-    // Προεπιλεγμένες τιμές με "Πληρωμή"
     document.getElementById("fillPayment").addEventListener("click", function() {
         paidField.value = costField.value;
         balanceField.value = 0;
         paymentDateField.value = new Date().toISOString().slice(0, 10);
-        receiverField.value = 1; 
-        collectorFeeRateField.value = 0.06; 
+        receiverField.value = 1;
+        collectorFeeRateField.value = 0.06;
         updateCollectorFee();
     });
 
